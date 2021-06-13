@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.5" tiledversion="1.6.0" orientation="orthogonal" renderorder="right-down" width="12" height="10" tilewidth="98" tileheight="98" infinite="0" nextlayerid="30" nextobjectid="1">
+ <tileset firstgid="1" name="chessboard-small-4" tilewidth="98" tileheight="98" tilecount="1" columns="1">
+  <image source="chessboard-pic-resources/chessboard-small-4.png" width="98" height="98"/>
+ </tileset>
+ <tileset firstgid="2" name="chessboard-small-5" tilewidth="98" tileheight="98" tilecount="1" columns="1">
+  <image source="chessboard-pic-resources/chessboard-small-5.png" width="98" height="98"/>
+ </tileset>
+ <tileset firstgid="3" name="tree" tilewidth="98" tileheight="98" tilecount="10" columns="1">
+  <image source="chessboard-pic-resources/tree.png" width="98" height="980"/>
+ </tileset>
+ <tileset firstgid="13" name="tree2" tilewidth="98" tileheight="98" tilecount="10" columns="1">
+  <image source="chessboard-pic-resources/tree2.png" width="98" height="980"/>
+ </tileset>
+ <tileset firstgid="23" name="chessboard-small-7" tilewidth="98" tileheight="98" tilecount="10" columns="10">
+  <image source="chessboard-pic-resources/chessboard-small-7.png" width="980" height="98"/>
+ </tileset>
+ <tileset firstgid="33" name="chessboard-small-7-1" tilewidth="98" tileheight="98" tilecount="10" columns="1">
+  <image source="chessboard-pic-resources/chessboard-small-7-1.png" width="98" height="980"/>
+ </tileset>
+ <tileset firstgid="43" name="chessboard-small-7-2" tilewidth="98" tileheight="98" tilecount="10" columns="1">
+  <image source="chessboard-pic-resources/chessboard-small-7-2.png" width="98" height="980"/>
+ </tileset>
+ <layer id="5" name="layer-tree-left" width="12" height="10">
+  <data encoding="base64" compression="zlib">
+   eJxjZiANsJConpVE9WwkqmcmUf1gcz87ieo5SFQPADAAADQ=
+  </data>
+ </layer>
+ <layer id="6" name="layer-tree-right" width="12" height="10">
+  <data encoding="base64" compression="zlib">
+   eJxjYCAe8JKgFgT4SFTPT6J6ARLVC5Kofqi7XwiIAYD8AJw=
+  </data>
+ </layer>
+ <layer id="17" name="layer-start-up" width="12" height="10">
+  <data encoding="base64" compression="zlib">
+   eJxjYIAASSCWAmJZIJYDYmkglkGiR8HQBACLXwDd
+  </data>
+ </layer>
+ <layer id="18" name="layer-start-down" width="12" height="10">
+  <data encoding="base64" compression="zlib">
+   eJxjYBgFQxFIArEUEEsDsQwQywKxHBDLA7ECkjoAGGAA5Q==
+  </data>
+ </layer>
+ <layer id="19" name="layer-start-right" width="12" height="10">
+  <data encoding="base64" compression="zlib">
+   eJxjYCAOaBOpDgZ0SVSvR6J6fRLVGwwy8w1JVG9EonpYfAEAlM8B0w==
+  </data>
+ </layer>
+ <layer id="21" name="layer-chess-1" width="12" height="10">
+  <data encoding="base64" compression="zlib">
+   eJxjYCAPMI2qH1D1xAIAEeAAEQ==
+  </data>
+ </layer>
+ <layer id="22" name="layer-chess-2" width="12" height="10">
+  <data encoding="base64" compression="zlib">
+   eJxjYCAfMI2qH1D1xAAAEaAAEQ==
+  </data>
+ </layer>
+ <layer id="23" name="layer-chess-3" width="12" height="10">
+  <data encoding="base64" compression="zlib">
+   eJxjYKAMMI2qH1D1hAAAEWAAEQ==
+  </data>
+ </layer>
+ <layer id="25" name="layer-chess-4" width="12" height="10">
+  <data encoding="base64" compression="zlib">
+   eJxjYKAcMI2qH1D1+AAAESAAEQ==
+  </data>
+ </layer>
+ <layer id="20" name="layer-start-left" width="12" height="10">
+  <data encoding="base64" compression="zlib">
+   eJxjYGBgUGYgDaiQqF6VRPVqg8x8dRLVa5CoXpNE9VokqAUAe/MBgA==
+  </data>
+ </layer>
+ <layer id="26" name="layer-chess-5" width="12" height="10">
+  <data encoding="base64" compression="zlib">
+   eJxjYKAOYBpVP6DqcQEAEOAAEQ==
+  </data>
+ </layer>
+ <layer id="27" name="layer-chess-6" width="12" height="10">
+  <data encoding="base64" compression="zlib">
+   eJxjYKAeYBpVP6DqsQEAEKAAEQ==
+  </data>
+ </layer>
+ <layer id="28" name="layer-chess-7" width="12" height="10">
+  <data encoding="base64" compression="zlib">
+   eJxjYKAuYBpVP6Dq0QEAEGAAEQ==
+  </data>
+ </layer>
+ <layer id="29" name="layer-chess-8" width="12" height="10">
+  <data encoding="base64" compression="zlib">
+   eJxjYKA+YBpVP6DqkQEAECAAEQ==
+  </data>
+ </layer>
+</map>
