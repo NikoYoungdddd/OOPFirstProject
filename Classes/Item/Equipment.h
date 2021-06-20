@@ -6,10 +6,10 @@
 class Equipment : public Node
 {
 public:
-	Equipment();
+	Equipment(const Vec2& pos);
 	~Equipment();
 	virtual bool init();
-	static Equipment* create();
+	static Equipment* create(const Vec2& pos);
 
 	std::string getEquipment()const;
 
@@ -21,5 +21,6 @@ private:
 	Sprite* equipment = nullptr;
 	bool alreadyCreateEquipment = false;
 	std::string equipmentName;
+	
 };
 #endif

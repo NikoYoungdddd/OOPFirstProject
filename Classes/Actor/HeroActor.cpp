@@ -47,6 +47,10 @@ std::pair<int, int>HeroActor::getBoardPos()const
 {
 	return std::make_pair(boardX, boardY);
 }
+std::pair<int, int>HeroActor::getTargetBoardPos()const
+{
+	return std::make_pair(targetBoardPosX, targetBoardPosY);
+}
 void HeroActor::setAlive(bool is)
 {
 	isAlive = is;
@@ -67,6 +71,19 @@ void HeroActor::setHeroOpacity(const uint8_t p)
 	myHero->setOpacity(p);
 	bloodBar->setOpacity(p);
 }
+void HeroActor::setOrientation(const int orit)
+{
+	//Ä¬ÈÏ³¯Ïò ÓÒ
+	//Ä¬ÈÏsetFlip(true) ¾µÏñ setFlip(false) È¡Ïû¾µÏñ
+	if (TO_RIGHT == orit)
+	{
+		myHero->setFlippedX(false);
+	}
+	else if (TO_LEFT == orit)
+	{
+		myHero->setFlippedX(true);
+	}
+}
 
 void HeroActor::stopShootAndMove()
 {
@@ -79,12 +96,9 @@ void HeroActor::stopHeroActionByTag(const int actionTag)
 
 void HeroActor::selfDied()
 {
-	if (!dieOnce)
-	{
-		setHeroOpacity(0);
-		stopShootAndMove();
-		dieOnce = true;
-	}
+	setHeroOpacity(0);
+	stopShootAndMove();
+	dieOnce = true;
 }
 void HeroActor::enemyDied()
 {
@@ -98,11 +112,16 @@ void HeroActor::resetHero()
 	isTargetAlive = true;
 	dieOnce = false;
 	m_HP = static_cast<unsigned int>(HeroHp[m_Type]);
-	isFliped = isEnemy;
 	myHero->setFlippedX(isEnemy);
+	resetHeroTag();
+	setHeroOpacity(255);
+	bloodBar->setPercentage(100.f);
+	stopShootAndMove();
+	auto animate = createAnimate("attack");
+	myHero->runAction(animate);
 }
 
-void HeroActor::getEnemy(const std::vector<Vec2> vec)
+void HeroActor::getEnemy(const std::vector<Vec2>& vec)
 {
 	vecPos = vec;
 }
@@ -135,10 +154,7 @@ void HeroActor::createHeroActor(const bool enemy)
 	isEnemy = enemy;
 	myHero = Sprite::create(heroPic[m_Type]);
 	myHero->setScale(HERO_SCALE);
-
 	myHero->setFlippedX(isEnemy);
-	isFliped = isEnemy;
-
 	this->addChild(myHero);
 	Sprite* bloodSp = nullptr;
 	if (!enemy)
@@ -176,6 +192,7 @@ void HeroActor::heroBuild()
 
 void HeroActor::changeHeroTag(const int t)
 {
+
 	myHero->setTag(t);
 }
 
@@ -221,7 +238,6 @@ Animate* HeroActor::createAnimate(const char* action)
 	animate->retain();
 	return animate;
 }
-
 
 void HeroActor::doAttack()
 {

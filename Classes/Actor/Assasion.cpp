@@ -50,15 +50,23 @@ void Assasion::searchEnemy(std::pair<Vec2, int>(&board)[8][8], const bool stay)
 		}
 	}
 
-	int flag = 1;
+
 	if (!stay)
+	{
+		int flag = 1;
+		board[boardX][boardY].second = EMPTY;
+
 		for (int i = 0; i < 8 && flag; i++)
 		{
 			for (int j = 0; j < 8 && flag; j++)
 			{
 				if (board[i][j].first == endDest)
 				{
-					board[i][j].second = LOCKED;
+					targetBoardPosX = i;
+					targetBoardPosY = j;
+					if (board[i][j].second == OCCUPIED)
+						board[i][j].second = EMPTY;
+					board[i][j].second ++;
 					for (int k = 0; k < 5; k++)
 					{
 						int x = AssasionSearch[k][0], y = AssasionSearch[k][1];
@@ -77,15 +85,34 @@ void Assasion::searchEnemy(std::pair<Vec2, int>(&board)[8][8], const bool stay)
 				}
 			}
 		}
+	
+	}
 
+	else
+	{
+		int flag = 1;
+		for (int i = 0; i < 8 && flag; i++)
+		{
+			for (int j = 0; j < 8 && flag; j++)
+			{
+				if (board[i][j].first == endDest)
+				{
+					targetBoardPosX = i;
+					targetBoardPosY = j;
+					if (board[i][j].second == OCCUPIED)
+						board[i][j].second = EMPTY;
+					board[i][j].second++;
+					flag = 0;
+				}
+			}
+		}
+	}
 	targetPos = endDest;
 	attackPos = stayPos;
 	moveDuration = longestLen / SPEED;
-
 }
 
-
-void Assasion::attack(float ft, const bool stay)
+void Assasion::attack(const bool stay)
 {
 	float ff = ATTACK_DURATION_MARK / m_Status.m_AttackFrequency;
 
@@ -102,17 +129,16 @@ void Assasion::attack(float ft, const bool stay)
 		attackBullet->shootBullet(Sequence::create(pointMove, pointMoveDone, nullptr));
 		});
 	auto delay_t = DelayTime::create(ff);
-	auto shootArray = Repeat::create(Sequence::create(delay_t, shoot, nullptr), 10);	
-	
-	if (isEnemy && targetPos.x - attackPos.x > 0)
+	auto shootArray = Repeat::create(Sequence::create(delay_t, shoot, nullptr), 20);	
+	//auto shootArray = RepeatForever::create(Sequence::create(delay_t, shoot, nullptr));
+
+	if (targetPos.x - attackPos.x > 0.00001f)
 	{
-		myHero->setFlippedX(!isFliped);
-		isFliped = (!isFliped);
+		this->setOrientation(TO_RIGHT);
 	}
-	else if (!isEnemy && targetPos.x - attackPos.x < 0)
+	else if (targetPos.x - attackPos.x < -0.00001f)
 	{
-		myHero->setFlippedX(!isFliped);
-		isFliped = (!isFliped);
+		this->setOrientation(TO_LEFT);
 	}
 	if (!stay)
 	{

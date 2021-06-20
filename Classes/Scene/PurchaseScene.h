@@ -1,7 +1,10 @@
 #ifndef __PURCHASE_SCENE_H__
 #define __PURCHASE_SCENE_H__
-#include "cocos2d.h"
-USING_NS_CC;
+
+#include "Player.h"
+#include "HeroLayer.h"
+#include "Const/Const.h"
+
 class PurchaseScene : public cocos2d::Scene
 {
 public:
@@ -9,10 +12,11 @@ public:
 
     virtual bool init();
 
-    void menuCloseCallback(cocos2d::Ref* pSender);
     void menuReturn(Ref* pSender);
-    // implement the "static create()" method manually
+    void PurchaseScene::update(float dt);
     CREATE_FUNC(PurchaseScene);
-    TMXTiledMap* chessboard3;
+private:
+    unsigned int num;
+    Label* labelPlayerGold;
 };
 #endif

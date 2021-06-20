@@ -1,8 +1,20 @@
 #include "Equipment.h"
 
-Equipment::Equipment()
+Equipment::Equipment(const Vec2& pos)
 {
 	alreadyCreateEquipment = false;
+	srand((unsigned)(time(nullptr)));
+	if (alreadyCreateEquipment == false)
+	{
+		srand((unsigned)(time(nullptr)));
+		int randName = rand() % 4;
+		equipment = Sprite::create(weaponName[randName]);
+		equipmentName = weaponName[randName];
+		equipment->setScale(EQUIPMENT_SCALE);
+		equipment->setPosition(pos);
+		alreadyCreateEquipment = true;
+		this->addChild(equipment);
+	}
 }
 
 Equipment::~Equipment()
@@ -16,19 +28,7 @@ bool Equipment::init()
 	{
 		return true;
 	}
-	srand((unsigned)(time(nullptr)));
-	if (alreadyCreateEquipment == false)
-	{
-		srand((unsigned)(time(nullptr)));
-		int randName = rand() % 4;
-		equipment = Sprite::create(weaponName[randName]);
-		equipmentName = weaponName[randName];
-		equipment->setScale(EQUIPMENT_SCALE);
-		equipment->setPosition(Vec2(BOARD_PIECE_SIZE * (5 + 2.5f), BOARD_PIECE_SIZE * (5 + 1.5f)));
-		alreadyCreateEquipment = true;
-		this->addChild(equipment);
-	}
-
+	
 	auto touchListener = EventListenerTouchOneByOne::create();
 	touchListener->onTouchBegan = CC_CALLBACK_2(Equipment::onTouchBegan, this);
 	_eventDispatcher->addEventListenerWithSceneGraphPriority(touchListener, this);
@@ -42,7 +42,7 @@ bool Equipment::onTouchBegan(cocos2d::Touch* touch, cocos2d::Event* unused_event
 	if (equipment != nullptr)
 	{
 		auto equipmentPosition = equipment->getPosition();
-		auto equipmentSize = equipment->getContentSize() * EQUIPMENT_SCALE;
+		auto equipmentSize = equipment->getContentSize() * EQUIPMENT_SCALE * 0.5f;
 		if (touchLocation.x > equipmentPosition.x - equipmentSize.width / 2 &&
 			touchLocation.x <equipmentPosition.x + equipmentSize.width / 2 &&
 			touchLocation.y > equipmentPosition.y - equipmentSize.height / 2 &&
@@ -56,9 +56,9 @@ bool Equipment::onTouchBegan(cocos2d::Touch* touch, cocos2d::Event* unused_event
 	return true;
 }
 
-Equipment* Equipment::create()
+Equipment* Equipment::create(const Vec2& pos)
 {
-	auto pRet = new Equipment();
+	auto pRet = new Equipment(pos);
 	if (pRet && pRet->init())
 	{
 		pRet->autorelease();
