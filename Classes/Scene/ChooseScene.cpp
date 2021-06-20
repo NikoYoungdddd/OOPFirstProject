@@ -1,5 +1,7 @@
 #include "ChooseScene.h"
 
+extern int BGMID;
+
 static void problemLoading(const char* filename)
 {
     printf("Error while loading: %s\n", filename);
@@ -103,6 +105,7 @@ bool ChooseScene::init()
 
 void ChooseScene::menuAI(Ref* pSender)
 {
+    AudioEngine::pause(BGMID);
     Player::getInstance()->isAI = 1;
     Director::getInstance()->replaceScene(TransitionFade::create(0.5f, GameScene::createScene()));
 }
@@ -110,6 +113,7 @@ void ChooseScene::menuAI(Ref* pSender)
 
 void ChooseScene::menuServer(Ref* pSender)
 {
+    AudioEngine::pause(BGMID);
     Player::getInstance()->isAI = 0;
     Player::getInstance()->server = SERVER;
 
@@ -122,6 +126,7 @@ void ChooseScene::menuServer(Ref* pSender)
 
 void ChooseScene::menuClient(Ref* pSender)
 {
+    AudioEngine::pause(BGMID);
 	Player::getInstance()->isAI = 0;
 	Player::getInstance()->server = CLIENT;
 

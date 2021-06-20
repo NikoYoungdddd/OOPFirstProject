@@ -4,6 +4,7 @@
 
 #include "Const/Const.h"
 #include "GameScene.h"
+#include "AudioEngine.h"
 
 /*选择游戏模式为联机或AI对战*/
 class ChooseScene : public Scene
