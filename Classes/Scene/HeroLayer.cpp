@@ -1,19 +1,8 @@
-#include "HeroLayer.h"
 
-#define TSET_PURCHASE 0
-#define TEST_HERO_TOUCH 0
-#define TEST_HERO_SEARCH_AI 1
-#define TEST_PHYSICS 1
-#define TEST_EQUIPMENT 0
+#include "HeroLayer.h"
 
 HeroLayer::HeroLayer()
 {
-	num = 0;
-	isHeroTouched = false;
-	deltaX = 0;
-	deltaY = 0;
-	touchedHero = nullptr;
-
 	for (int i = 0; i < 8; i++)
 	{
 		for (int j = 0; j < 8; j++)
@@ -24,243 +13,546 @@ HeroLayer::HeroLayer()
 			board[i][j] = temp;
 		}
 	}
-}
 
-void HeroLayer::testPush(const int n, const Vec2& pos, const int c)
-{
-	bool flag = true;
-	int x = 0, y = 0;
-	for (int i = 0; i < 8 && flag; i++)
+	for (int i = 0; i < 8; i++)
 	{
-		for (int j = 0; j < 8 && flag; j++)
-		{
-			if (pos == board[i][j].first)
-			{
-				x = i;
-				y = j;
-				flag = false;
-			}
-		}
+		readyPos[i].first = Vec2(98 * 1.5f, 98.f * ((7 - i) + 1.5f));
+		readyPos[i].second = EMPTY;
 	}
-	HeroActor* h = nullptr;
-	if (n == 0)
+	for (int i = 0; i < 8; i++)
 	{
-		h = new Tank();
-	}
-	else if (n == 1)
-	{
-		h = new ADC();
-	}
-	else if (n == 2)
-	{
-		h = new Assasion();
-	}
-	else if (n == 3)
-	{
-		h = new AOE();
-	}
-	else if (n == 4)
-	{
-		h = new AP();
-	}
-	h->autorelease();
-	h->createHeroActor(c == 1);
-
-	if (nullptr != h)
-	{
-		h->setHeroPos(pos);
-		h->setBoardPos(x, y);
-		if (c == 0)
-		{
-			numMy++;
-			testm.push_back(h);
-		}
-		if (c == 1)
-		{
-			numAI++;
-			teste.push_back(h);
-			vece.push_back(pos);
-		}
-		this->addChild(h);
+		equipmentPos[i].first = Vec2(98 * .5f, 98.f * ((7 - i) + 1.5f));
+		equipmentPos[i].second = EMPTY;
 	}
 }
 
-void HeroLayer::removeFromPositonVec(const Vec2& pos, std::vector<Vec2>& posVec)
+template<class T>
+void HeroLayer::removeFromVec(const T& elem, std::vector<T>& elemVec)
 {
-	for (auto iter = posVec.begin(); iter != posVec.end(); iter++)
+	for (auto iter = elemVec.begin(); iter != elemVec.end(); iter++)
 	{
-		if (*iter == pos)
+		if (*iter == elem)
 		{
-			posVec.erase(iter);
+			elemVec.erase(iter);
 			break;
 		}
 	}
 	return;
 }
 
-void HeroLayer::testCreate()
+void HeroLayer::testCreate(float dt)
 {
 	srand(unsigned(time(nullptr)));
-	for (int i = 0; i < 4; i++)
+	for (int i = 0; i < 4;)
 	{
-		int mt = rand() % 5;
-		int mx = rand() % 4;
-		int my = rand() % 4 + 4;
-		testPush(mt, board[mx][my].first, 0);
+		int mytype = rand() % 5;
+		int myx = rand() % 4;
+		int myy = rand() % 4 + 4;
+		if (!board[myx][myy].second)
+		{
+			i++;
+			createHero(mytype, myx, myy, false);
+			board[myx][myy].second = OCCUPIED;
+		}
 	}
 	for (int i = 0; i < 4;)
 	{
-		int et = rand() % 5;
-		int ex = rand() % 3 + 4;
-		int ey = rand() % 4 + 2;
-		if (!board[ex][ey].second)
+		int aitype = rand() % 5;
+		int aix = rand() % 3 + 4;
+		int aiy = rand() % 4 + 2;
+		if (!board[aix][aiy].second)
 		{
 			i++;
-			testPush(et, board[ex][ey].first, 1);
-			board[ex][ey].second = OCCUPIED;
+			createHero(aitype, aix, aiy, true);
+			board[aix][aiy].second = OCCUPIED;
+		}
+	}
+}
+
+void HeroLayer::testAI(float dt)
+{
+	if (numMyHeros != numAIHeros)
+		for (int i = 0; i <= numMyHeros - numAIHeros;)
+		{
+
+			int aitype = rand() % 5;
+			int aix = rand() % 3 + 4;
+			int aiy = rand() % 4 + 2;
+			if (!board[aix][aiy].second)
+			{
+				i++;
+				createHero(aitype, aix, aiy, true);
+				board[aix][aiy].second = OCCUPIED;
+			}
+		}
+}
+void  HeroLayer::createHeroOnReady(const int type)
+{
+	HeroActor* hero = nullptr;
+	if (type == Type_Tank)
+		hero = new Tank();
+	else if (type == Type_Assasion)
+		hero = new Assasion();
+	else if (type == Type_ADC)
+		hero = new ADC();
+	else if (type == Type_AP)
+		hero = new AP();
+	else if (type == Type_AOE)
+		hero = new AOE();
+	if (nullptr != hero)
+	{
+		hero->autorelease();
+		hero->createHeroActor();
+		Vec2 pos;
+		for (int i = 0; i < 8; i++)
+		{
+			if (!readyPos[i].second)
+			{
+				pos = readyPos[i].first;
+				readyPos[i].second = OCCUPIED;
+				hero->setBoardPos(-1, i);
+				break;
+			}
+		}
+		arrayHeroNum[type]++;
+		hero->setHeroPos(pos);
+		this->addChild(hero);
+		vecHeroOnReady.push_back(hero);
+	}
+}
+
+void HeroLayer::createHeroOnBoard(HeroActor* hero, const int x, const int y)
+{
+	hero->setHeroPos(board[x][y].first);
+	hero->setBoardPos(x,y);
+	vecMyHeroReset.push_back(board[x][y].first);
+	vecMyHeroBoardPos.push_back(std::make_pair(x, y));
+	board[x][y].second = OCCUPIED;
+	hero->heroBuild();
+	numMyHeros++;
+	vecMyHeros.push_back(hero);
+}
+void HeroLayer::createHero(const int type, const int x, const int y, bool isAI)
+{
+	HeroActor* hero = nullptr;
+	if (type == Type_Tank)
+		hero = new Tank();
+	else if (type == Type_Assasion)
+		hero = new Assasion();
+	else if (type == Type_ADC)
+		hero = new ADC();
+	else if (type == Type_AP)
+		hero = new AP();
+	else if (type == Type_AOE)
+		hero = new AOE();
+	if (nullptr != hero)
+	{
+		hero->autorelease();
+		hero->createHeroActor(isAI);
+		hero->setHeroPos(board[x][y].first);
+		hero->setBoardPos(x, y);
+		hero->heroBuild();
+		if (!isAI)
+		{
+			numMyHeros++;
+			vecMyHeros.push_back(hero);
+			vecMyHeroReset.push_back(board[x][y].first);
+			vecMyHeroBoardPos.push_back(std::make_pair(x, y));
+		}
+		if (isAI)
+		{
+			numAIHeros++;
+			vecAIHeros.push_back(hero);
+			vecAIHeroPos.push_back(board[x][y].first);
+			vecAIHeroReset.push_back(board[x][y].first);
+			vecAIHeroBoardPos.push_back(std::make_pair(x, y));
+		}
+		this->addChild(hero);
+	}
+}
+
+void HeroLayer::heroStarsUP()
+{
+	int numOnBoard = 0, numOnReady = 0;
+	int herotype = 6;
+	for (int type = 0; type < 5; type++)
+	{
+		if (arrayHeroNum[type] >= 3)
+		{
+			herotype = type;
+			for (auto hero : vecMyHeros)
+			{
+				if (hero->m_Type == type && hero->m_Star == 1)
+				{
+					numOnBoard++;
+				}
+			}
+			for (auto hero : vecHeroOnReady)
+			{
+				if (hero->m_Type == type && hero->m_Star == 1)
+				{
+					numOnReady++;
+				}
+			}
+			if (numOnBoard + numOnReady >= 3)
+				arrayHeroNum[herotype] -= 2;
+			break;
+		}
+	}
+	if (numOnBoard + numOnReady >= 3)
+	{
+		if (numOnBoard != 0)
+		{
+			if (numOnBoard == 1)
+			{
+				for (auto &hero : vecMyHeros)
+				{
+					if (hero->m_Type == herotype && hero->m_Star == 1)
+					{
+						hero->starsUP();
+						break;
+					}
+				}
+				int n = 0, i = 0;
+				int arr[5]{};
+				for (auto hero : vecHeroOnReady)
+				{					
+					if (hero->m_Type == herotype && hero->m_Star == 1)
+					{
+						arr[n++] = i;
+						if (n <= 2)
+						{
+							auto pos = hero->getBoardPos();
+							readyPos[pos.second].second = EMPTY;
+							this->removeChild(hero);
+						}
+					}
+					i++;
+				}
+				vecHeroOnReady.erase(vecHeroOnReady.begin() + arr[1]);
+				vecHeroOnReady.erase(vecHeroOnReady.begin() + arr[0]);
+			}
+			else if (numOnBoard == 2)
+			{
+				int n = 0, i = 0;
+				int arr[5]{};
+				bool isFind = false;
+				for (auto& hero : vecMyHeros)
+				{
+					if (!isFind)
+					{
+						if (hero->m_Type == herotype && hero->m_Star == 1)
+						{
+							isFind = true;
+							arr[n++] = i;
+						}
+					}
+					else
+					{
+						if (hero->m_Type == herotype && hero->m_Star == 1)
+						{
+							arr[n++] = i;
+							if (n <= 2)
+							{
+								auto pos = hero->getBoardPos();
+								board[pos.first][pos.second].second = EMPTY;
+								this->removeChild(hero);
+							}
+						}
+					}
+					i++;
+				}
+				vecMyHeros.erase(vecMyHeros.begin() + arr[1]);
+
+				int m = 0;
+				for (auto &hero : vecHeroOnReady)
+				{
+					if (hero->m_Type == herotype && hero->m_Star == 1)
+					{
+						this->removeChild(hero);
+						break;
+					}
+					m++;
+				}
+				vecHeroOnReady.erase(vecHeroOnReady.begin() + m);
+			}
 		}
 		else
 		{
-			continue;
+			bool isFind = false;
+			int arr[8]{};
+			int n = 0, i = 0;
+			for (auto& hero : vecHeroOnReady)
+			{			
+				if (!isFind)
+				{
+					if (hero->m_Type == herotype && hero->m_Star == 1)
+					{
+						isFind = true;
+						arr[n++] = i;
+					}
+				}
+				else
+				{
+					if (hero->m_Type == herotype && hero->m_Star == 1)
+					{
+						arr[n++] = i;
+						if (n <= 3)
+						{
+							auto pos = hero->getBoardPos();
+							readyPos[pos.second].second = EMPTY;
+							this->removeChild(hero);
+						}
+					}
+				}
+				i++;
+			}
+			vecHeroOnReady.erase(vecHeroOnReady.begin() + arr[2]);
+			vecHeroOnReady.erase(vecHeroOnReady.begin() + arr[1]);
+			vecHeroOnReady[arr[0]]->starsUP();
 		}
 	}
 }
 
-void HeroLayer::testPosAllocate(float dt)
+void  HeroLayer::updateHeroPos(bool isAI)
 {
-	isUpdate = true;
-	for (auto i : testm)
+	if (!isAI)
 	{
-		i->heroBuild();
-		i->getEnemy(vece);
-		i->searchEnemy(board);
-		i->attack(0.2f);
+		vecMyHeroPos.clear();
+		for (auto hero : vecMyHeros)
+			if (hero->isAlive)
+				vecMyHeroPos.push_back(hero->getHeroStayPos());
+	}
+	else
+	{
+		vecAIHeroPos.clear();
+		for (auto hero : vecAIHeros)
+			if (hero->isAlive)
+				vecAIHeroPos.push_back(hero->getHeroStayPos());
 	}
 }
 
-void HeroLayer::testEnemy(float dt)
+void HeroLayer::searchAgain(std::vector<HeroActor*>& vecHero, const std::vector<Vec2>& vecPos, const int side)
 {
-	testPosAllocate(dt);
-	isUpdate = true;
-	for (auto v : testm)
-	{
-		vecm.push_back(v->getHeroStayPos());
-	}
+	
+}
 
-	for (auto v : teste)
+void HeroLayer::allocateMyHero()
+{
+	isUpdate = true;
+	for (auto hero : vecMyHeros)
 	{
-		vece.clear();
-		v->heroBuild();
-		int flag = 1;
-		auto pos = v->getHeroPos();
-		for (int i = 0; i < 8 && flag; i++)
+		hero->getEnemy(vecAIHeroPos);
+		hero->searchEnemy(board);
+		hero->attack();
+	}
+}
+
+void HeroLayer::allocateAIHero()
+{
+	isUpdate = true;
+	vecMyHeroPos.clear();
+	for (auto hero : vecMyHeros)
+	{
+		if (hero->isAlive)
+			vecMyHeroPos.push_back(hero->getHeroStayPos());
+	}
+	vecAIHeroPos.clear();
+	for (auto hero : vecAIHeros)
+	{
+		auto boardPos = hero->getBoardPos();
+		int boardStatus = board[boardPos.first][boardPos.second].second;
+		bool isLocked = ((boardStatus >= LOCKED) && (boardStatus != OCCUPIED));
+		hero->getEnemy(vecMyHeroPos);
+		hero->searchEnemy(board, isLocked);
+		hero->attack(isLocked);
+		vecAIHeroPos.push_back(hero->getHeroPos());		
+	}
+}
+
+void HeroLayer::startRound(float dt)
+{
+	allocateMyHero();
+	allocateAIHero();
+}
+
+void HeroLayer::boardReset(float dt)
+{
+	int n = 0, m = 0;
+	for (auto& hero : vecMyHeros)
+	{
+		hero->resetHero();
+		hero->setHeroPos(vecMyHeroReset[n]);
+		hero->setBoardPos(vecMyHeroBoardPos[n].first, vecMyHeroBoardPos[n].second);
+		n++;
+	}
+	vecMyHeroPos.clear();
+	vecMyHeroPos = vecMyHeroReset;
+	numMyHeros = vecMyHeros.size();
+
+	for (auto& hero : vecAIHeros)
+	{
+		hero->resetHero();
+		hero->setHeroPos(vecAIHeroReset[m]);
+		hero->setBoardPos(vecAIHeroBoardPos[m].first, vecAIHeroBoardPos[m].second);
+		m++;
+	}
+	vecAIHeroPos.clear();
+	vecAIHeroPos = vecAIHeroReset;
+	numAIHeros = vecAIHeros.size();
+
+	for (int i = 0; i < 8; i++)
+	{
+		for (int j = 0; j < 8; j++)
 		{
-			for (int j = 0; j < 8 && flag; j++)
+			board[i][j].second = EMPTY;
+			for (auto pos : vecAIHeroReset)
+				if (pos == board[i][j].first)
+					board[i][j].second = OCCUPIED;
+
+			for (auto pos : vecMyHeroReset)
+				if (pos == board[i][j].first)
+					board[i][j].second = OCCUPIED;
+		}
+	}
+	
+	isStartNewRound = true;
+}
+
+void HeroLayer::timeCountDown(float dt)
+{
+//	isGameStart = true;
+}
+
+void HeroLayer::updateHeros()
+{
+	if (isUpdate)
+	{
+		for (auto& hero : vecMyHeros)
+		{
+			if (nullptr != hero)
 			{
-				if (board[i][j].first == pos && board[i][j].second != LOCKED)
+				hero->update();
+				auto tlct = hero->getTargetBoardPos();
+				int isTargetEmpty = board[tlct.first][tlct.second].second;
+				if (numMyHeros && hero->isAlive && (!hero->isTargetAlive || (isTargetEmpty == EMPTY))
+					&& !vecAIHeroPos.empty())
 				{
-					v->getEnemy(vecm);
-					v->searchEnemy(board);
-					v->attack(0.2f);
-					flag = 0;
-				}
-				else if (board[i][j].first == pos)
-				{
-					v->getEnemy(vecm);
-					v->searchEnemy(board, true);
-					v->attack(0.2f, true);
-					flag = 0;
+					updateHeroPos(true);
+					auto boardPos = hero->getBoardPos();
+					int boardStatus = board[boardPos.first][boardPos.second].second;
+					bool isLocked = ((boardStatus >= LOCKED) && boardStatus != OCCUPIED);
+					hero->isTargetAlive = true;
+					hero->getEnemy(vecAIHeroPos);
+					hero->searchEnemy(board, isLocked);
+					hero->attack(isLocked);
 				}
 			}
 		}
-		auto pos2 = v->getHeroPos();
-		vece.push_back(pos2);
+
+		for (auto& hero : vecAIHeros)
+		{
+
+			if (nullptr != hero)
+			{
+				hero->update();
+				auto tlct = hero->getTargetBoardPos();
+				int isTargetEmpty = board[tlct.first][tlct.second].second;
+				if (numAIHeros && hero->isAlive && (!hero->isTargetAlive || (isTargetEmpty == EMPTY))
+					&& !vecMyHeroPos.empty())
+				{
+					updateHeroPos(false);
+					auto boardPos = hero->getBoardPos();
+					int boardStatus = board[boardPos.first][boardPos.second].second;
+					bool isLocked = ((boardStatus >= LOCKED) && boardStatus != OCCUPIED);
+					hero->isTargetAlive = true;
+					hero->getEnemy(vecMyHeroPos);
+					hero->searchEnemy(board, isLocked);
+					hero->attack(isLocked);
+				}
+			}
+		}
+		if (numAIHeros == 0 || numMyHeros == 0)
+		{
+			if (numAIHeros == 0)
+			{
+				Player::getInstance()->playerGold += 5;
+				Player::getInstance()->enemyHP -= 5;
+				AIGold += 2;
+			}
+			else
+			{
+				Player::getInstance()->playerGold += 2;
+				Player::getInstance()->playerHP -= 5;
+				AIGold += 5;
+			}
+			
+
+			isUpdate = false;
+			createEquipment(board[5][5].first);
+			//ÂÆöÊó∂Âô®ÊòØÂêåÊó∂ÂºÄÂßãÁöÑ
+			scheduleOnce(CC_SCHEDULE_SELECTOR(HeroLayer::boardReset), ROUND_END_TIME);
+			scheduleOnce(CC_SCHEDULE_SELECTOR(HeroLayer::testAI), 5.0f);
+			scheduleOnce(CC_SCHEDULE_SELECTOR(HeroLayer::startRound), ROUND_END_TIME + PREPARE_TIME);
+		}
+	}
+	if (!isGameStart)
+	{
+		isGameStart = true;
+		scheduleOnce(CC_SCHEDULE_SELECTOR(HeroLayer::timeCountDown), ROUND_END_TIME*2);
+		scheduleOnce(CC_SCHEDULE_SELECTOR(HeroLayer::testAI), ROUND_END_TIME * 3);
+		scheduleOnce(CC_SCHEDULE_SELECTOR(HeroLayer::startRound), ROUND_END_TIME * 4);
 	}
 }
 
+void  HeroLayer::createEquipment(const Vec2& pos)
+{
+	auto equip = Equipment::create(pos);
+	this->addChild(equip);
+	vecEquipmentUncollected.push_back(equip);
+}
+
+void HeroLayer::updateEquipment()
+{
+	for (auto& equip : vecEquipmentUncollected)
+	{
+		if (equip != nullptr && equip->isMoved)
+		{
+			std::string eName = equip->getEquipment();
+			Sprite* equipSprite = Sprite::create(eName);
+			equipSprite->setScale(EQUIPMENT_SCALE);
+			equipSprite->setPosition(Vec2(98 * 2.5f + eqpnum * 25 + 25 / 2, 98 * 10 - 25 / 2)); eqpnum++;
+			this->addChild(equipSprite);
+			vecEquipment.push_back(equipSprite);
+			vecEquipmentName.push_back(eName);
+			equip->isMoved = false;
+			this->removeFromVec(equip, vecEquipmentUncollected);
+			this->removeChild(equip);			
+		}
+	}
+}
 bool HeroLayer::init()
 {
 	if (!Layer::init())
 	{
 		return true;
 	}
-
-#if TEST_EQUIPMENT
-
-	e = EquipmentLayer::create();
-	this->addChild(e);
-
-	h1 = new HeroAssasion();
-	h1->createHeroActor("Assasion.png");
-	h1->getEnemy(vec);
-	h1->setHeroPos(Vec2(BOARD_PIECE_SIZE * 2.5f, BOARD_PIECE_SIZE * 7.5f));
-	h1->autorelease();
-
-	this->addChild(h1);
-	vecHero.push_back(h1);
-
-#endif
-
-	//createPushActor("Tank.png", Vec2(BOARD_PIECE_SIZE * 2.5f, BOARD_PIECE_SIZE * 7.5f));
-
-	//createPushActor("Assasion.png", Vec2(98 * 7.5f, 98 * 6.5f));
-
-	//Ω¯“ª≤Ω AI π¶ƒ‹µƒ µœ÷–Ë“™ ‘›Õ£π¶ƒ‹ ∫Õ µπº∆ ±->ø™ ºπ¶ƒ‹£¨‘› ±√ª∑®–¥
-	//ÀÊª˙Œª÷√£¨ÀÊª˙”¢–€£¨Ωˆ≤‚ ‘
-#if TEST_HERO_SEARCH_AI
-	testCreate();
-
-	//schedule(CC_SCHEDULE_SELECTOR(SchedulerPauseResumeAllUser::tick1), 30.0f);
-	//scheduleOnce(CC_SCHEDULE_SELECTOR(HeroLayer::testEnemy), 5.0f);
-	// ◊œ»∑÷≈‰Œ“∑Ω”¢–€Œª÷√
-	//testPosAllocate();
-	//»ª∫Ûµ–∑Ω”¢–€≈–∂œ «∑Ò±ªÀ¯∂®£¨√ª”–‘Ú“∆∂Ø
-	testEnemy(0.2);
-
 	
-#endif
-
-	//98 * 6.5f, 98 * 5.5f
-	//98 * 7.5f, 98 * 6.5f
-	//Vec2(98 * 2.5f, 98 * 7.5f)
-	//Vec2(98 * 2.5f, 98 * 6.5f)
-	//Vec2(98 * 2.5f, 98 * 5.5f)
-
-	//≈‰∫œπ∫¬Ú≤„ π”√
-#if TEST_HERO_TOUCH
-	auto s1 = Sprite::create("star.png");
-	auto s2 = Sprite::create("round.png");
-	s1->setScale(0.3f);
-	s1->setPosition(BOARD_PIECE_SIZE * 6.5f, BOARD_PIECE_SIZE * 5.5f);
-	s2->setScale(0.3f);
-	s2->setPosition(BOARD_PIECE_SIZE * 7.5f, BOARD_PIECE_SIZE * 6.5f);
-	this->addChild(s1);
-	this->addChild(s2);
-	vec.push_back(s1->getPosition());
-	vec.push_back(s2->getPosition());
-#endif
-
+	
+	createEquipment(board[5][5].first);
+	//scheduleOnce(CC_SCHEDULE_SELECTOR(HeroLayer::testCreate), 5.0f);
+	//scheduleOnce(CC_SCHEDULE_SELECTOR(HeroLayer::startRound), 10.0f);
 	this->scheduleUpdate();
 
-#if TSET_PURCHASE
-	////π∫¬Ú”¢–€µƒ≤„
-	p = HeroPurchase::create();
-	this->addChild(p);
-#endif
-
-	//auto touchListener = EventListenerTouchOneByOne::create();
-	//touchListener->onTouchBegan = CC_CALLBACK_2(HeroLayer::onTouchBegan, this);
-	//touchListener->onTouchMoved = CC_CALLBACK_2(HeroLayer::onTouchMoved, this);
-	//touchListener->onTouchEnded = CC_CALLBACK_2(HeroLayer::onTouchEnded, this);
-	//touchListener->onTouchCancelled = CC_CALLBACK_2(HeroLayer::onTouchCancelled, this);
-	//_eventDispatcher->addEventListenerWithSceneGraphPriority(touchListener, this);
-
-
-#if TEST_PHYSICS
 	auto contactListener = EventListenerPhysicsContact::create();
 	contactListener->onContactBegin = CC_CALLBACK_1(HeroLayer::onContactBegin, this);
 	_eventDispatcher->addEventListenerWithSceneGraphPriority(contactListener, this);
-#endif
+	auto touchListener = EventListenerTouchOneByOne::create();
+	touchListener->onTouchBegan = CC_CALLBACK_2(HeroLayer::onTouchBegan, this);
+	touchListener->onTouchMoved = CC_CALLBACK_2(HeroLayer::onTouchMoved, this);
+	touchListener->onTouchEnded = CC_CALLBACK_2(HeroLayer::onTouchEnded, this);
+	touchListener->onTouchCancelled = CC_CALLBACK_2(HeroLayer::onTouchCancelled, this);
+	_eventDispatcher->addEventListenerWithSceneGraphPriority(touchListener, this);
 
 	return true;
 }
@@ -284,149 +576,26 @@ HeroLayer* HeroLayer::create()
 	}
 }
 
-void HeroLayer::createPushActor(const std::string& hero, const Vec2& putPos)
-{
-	HeroActor* h = nullptr;
-
-	if (hero == "Tank.png")
-	{
-		h = new Tank();
-	}
-	else if (hero == "ADC.png")
-	{
-		h = new ADC();
-
-	}
-	else if (hero == "Assasion.png")
-	{
-		h = new Assasion();
-
-	}
-	else if (hero == "AOE.png")
-	{
-		h = new AOE();
-
-	}
-	else if (hero == "AP.png")
-	{
-		h = new AP();
-
-	}
-	else
-		h = nullptr;
-
-	if (nullptr != h)
-	{
-		h->autorelease();
-		h->createHeroActor();
-		h->setHeroPos(putPos);
-		vecHeroOnReady.push_back(h);
-		this->addChild(h);
-
-	}
-}
-
 void HeroLayer::update(float ft)
 {
-#if TEST_HERO_SEARCH_AI
-	if (isUpdate)
-	{
-		for (auto &i : testm)
-		{
-			if (nullptr != i)
-			{			
-				i->update();
-				if (numMy && i->isAlive && !i->isTargetAlive)
-				{
-					i->isTargetAlive = true;
-					i->getEnemy(vece);
-					i->searchEnemy(board);
-					i->attack(0.5f);
-				}
-			}
-		}
-
-		for (auto &i : teste)
-		{
-			if (nullptr != i)
-			{				
-				i->update();
-				if (numAI && i->isAlive && !i->isTargetAlive)
-				{
-					i->isTargetAlive = true;
-					i->getEnemy(vecm);
-					i->searchEnemy(board);
-					i->attack(0.5f);
-				}
-			}
-		}
-
-	}
-#endif
-
-#if TSET_PURCHASE
-	s = p->getHero();
-	if (!s.empty() && num != p->getNum())
-	{
-		std::string sname = *(s.end() - 1);
-		num = p->getNum();
-		createPushActor(sname, Vec2(98 * 1.5f, 98.f * ((8 - num) + 1.5f)));
-	}
-#endif
-
-#if TEST_EQUIPMENT
-
-	if (e != nullptr && e->isMoved)
-	{
-		std::string wn = e->getEquipment();
-		Sprite* wp = Sprite::create(wn);
-		wp->setScale(EQUIPMENT_SCALE);
-		wp->setPosition(Vec2(98 * .5f, 98.f * ((8 - eqpnum) + 1.5f)));
-		eqpnum++;
-		this->addChild(wp);
-		vecEquipment.push_back(wp);
-		vecEquipmentName.push_back(wn);
-		this->removeChild(e);
-		e->isMoved = false;
-		//e = nullptr;
-	}
-
-#endif
-
-
-
-#if TEST_HERO_TOUCH
-
-	if (isTest)
-	{
-		auto test = *(vecHero.end() - 1);
-		test->getEnemy(vec);
-		test->searchEnemy(board);
-		test->attack(.2f);
-		isTest = false;
-	}
-	if (!vecHero.empty())
-	{
-		for (auto i : vecHero)
-		{
-			i->update();
-		}
-	}
-
-#endif
+	heroStarsUP();
+	updateEquipment();
+	updateHeros();
 }
 
 bool HeroLayer::onTouchBegan(cocos2d::Touch* touch, cocos2d::Event* unused_event)
 {
 	Vec2 touchLocation = touch->getLocation();
+	chosedHeroNo = 999;
+	int n = 0;
 	for (auto i : vecHeroOnReady)
 	{
-		chosedHeroNo = 0;
+		n++;
 		if (nullptr != i)
 		{
 			auto heroLocation = i->getHeroPos();
 			auto offset = touchLocation - heroLocation;
-			auto hSize = i->getHeroSize() * HERO_SCALE;
+			auto hSize = i->getHeroSize() * HERO_SCALE * HERO_TOUCH_SIZE;
 
 			if (touchLocation.x > heroLocation.x - hSize.width / 2 &&
 				touchLocation.x < heroLocation.x + hSize.width / 2 &&
@@ -438,10 +607,10 @@ bool HeroLayer::onTouchBegan(cocos2d::Touch* touch, cocos2d::Event* unused_event
 				deltaY = offset.y;
 				touchedHeroPos = heroLocation;
 				touchedHero = i;
+				chosedHeroNo=n;
 				break;
 			}
 		}
-		chosedHeroNo++;
 	}
 
 	if (!isHeroTouched)
@@ -472,38 +641,35 @@ bool HeroLayer::onTouchBegan(cocos2d::Touch* touch, cocos2d::Event* unused_event
 		}
 	}
 
-
 	return true;
 }
 void HeroLayer::onTouchMoved(cocos2d::Touch* touch, cocos2d::Event* unused_event)
 {
-	//for (auto &i : vecHeroOnReady)
-	//{
-	if (isHeroTouched /* && nullptr != i*/)
+	
+	if (isHeroTouched)
 	{
 		auto touchLocation = touch->getLocation();
 		auto visibleSize = Director::getInstance()->getVisibleSize();
 		auto origin = Director::getInstance()->getVisibleOrigin();
 		auto hSize = touchedHero->getHeroSize() * HERO_SCALE;
-		float x = touchLocation.x - deltaX;//”õµ√úp»•∆´“∆¡ø
+		float x = touchLocation.x - deltaX;//Ë®òÂæóÊ∏õÂéªÂÅèÁßªÈáè
 		float y = touchLocation.y - deltaY;
 
-		if (x <= hSize.width / 2 + origin.x)//xµΩ¥Ô∆¡ƒª◊Û±ﬂΩÁ
+		if (x <= hSize.width / 2 + origin.x)//xÂà∞ËææÂ±èÂπïÂ∑¶ËæπÁïå
 			x = hSize.width / 2 + origin.x;
-		else if (x >= visibleSize.width - hSize.width / 2)//xµΩ¥Ô∆¡ƒª”“±ﬂΩÁ
+		else if (x >= visibleSize.width - hSize.width / 2)//xÂà∞ËææÂ±èÂπïÂè≥ËæπÁïå
 			x = visibleSize.width - hSize.width / 2;
 
-		if (y <= hSize.height / 2 + origin.y)//yµΩ¥Ô∆¡ƒªœ¬±ﬂΩÁ
+		if (y <= hSize.height / 2 + origin.y)//yÂà∞ËææÂ±èÂπï‰∏ãËæπÁïå
 			y = hSize.height / 2 + origin.y;
-		else if (y >= visibleSize.height - hSize.height / 2)//xµΩ¥Ô∆¡ƒª…œ±ﬂΩÁ
+		else if (y >= visibleSize.height - hSize.height / 2)//xÂà∞ËææÂ±èÂπï‰∏äËæπÁïå
 			y = visibleSize.height - hSize.height / 2;
 
-		//∑…ª˙∏˙ÀÊ ÷÷∏“∆∂Ø
+		//È£ûÊú∫Ë∑üÈöèÊâãÊåáÁßªÂä®
 		touchedHero->setHeroPos(Vec2(x, y));
 	}
 
-	//}
-
+	
 	if (isEquipmentTouched)
 	{
 		auto touchLocation = touch->getLocation();
@@ -522,7 +688,7 @@ void HeroLayer::onTouchMoved(cocos2d::Touch* touch, cocos2d::Event* unused_event
 		else if (y >= visibleSize.height - eSize.height / 2)
 			y = visibleSize.height - eSize.height / 2;
 
-		//∑…ª˙∏˙ÀÊ ÷÷∏“∆∂Ø
+		//È£ûÊú∫Ë∑üÈöèÊâãÊåáÁßªÂä®
 		touchedEquipment->setPosition(Vec2(x, y));
 	}
 
@@ -543,12 +709,24 @@ void HeroLayer::onTouchEnded(cocos2d::Touch* touch, cocos2d::Event* unused_event
 				{
 					if (!board[i][j].second)
 					{
-						touchedHero->setHeroPos(board[i][j].first);
-						vecHero.push_back(touchedHero);
-						isBack = false;
-						isTest = true;
-						vecHeroOnReady.erase((vecHeroOnReady.begin() + chosedHeroNo));
-						break;
+						auto pos =touchedHero->getBoardPos();
+						if (pos.first == -1)
+							readyPos[pos.second].second = EMPTY;
+						if (board[i][j].second == EMPTY)
+						{
+							createHeroOnBoard(touchedHero,i,j);
+							//touchedHero->setHeroPos(board[i][j].first);
+							//board[i][j].second = OCCUPIED;
+							//touchedHero->setBoardPos(i, j);
+							//vecMyHeros.push_back(touchedHero);
+							isBack = false;
+							if (chosedHeroNo == 0)
+								vecHeroOnReady.erase((vecHeroOnReady.begin()));
+							else if (chosedHeroNo <= vecHeroOnReady.size())
+								vecHeroOnReady.erase((vecHeroOnReady.begin() + chosedHeroNo - 1));
+							chosedHeroNo = 999;
+							break;
+						}
 					}
 				}
 			}
@@ -562,7 +740,7 @@ void HeroLayer::onTouchEnded(cocos2d::Touch* touch, cocos2d::Event* unused_event
 		auto equipmentLocation = touchedEquipment->getPosition();
 		bool isBack = true;
 
-		for (auto i : vecHero)
+		for (auto i : vecMyHeros)
 		{
 			auto pos = i->getHeroPos();
 			if (equipmentLocation.x > (pos.x - 49) && equipmentLocation.x < (pos.x + 49) &&
@@ -608,17 +786,27 @@ bool HeroLayer::onContactBegin(cocos2d::PhysicsContact& contact)
 			auto tempActor = dynamic_cast<HeroActor*>(nodeA->getParent());
 			auto tempBullet = dynamic_cast<HeroBullet*>(nodeB->getParent());
 			tempActor->getDamaged(tempBullet->getBulletDamage());
-
 			if (!tempActor->isAlive)
 			{
-				auto attackActor = dynamic_cast<HeroActor*>(tempBullet->getParent());
-				tempActor->selfDied();
-				attackActor->enemyDied();
+				if (!tempActor->dieOnce)
+				{
+					tempActor->selfDied();				
+					auto pos = tempActor->getHeroPos();
+					this->removeFromVec(pos, vecAIHeroPos);
+					numAIHeros--;
+					auto tlct = tempActor->getTargetBoardPos();
+					if (board[tlct.first][tlct.second].second != EMPTY)
+						board[tlct.first][tlct.second].second--;
+					tempActor->dieOnce = true;
+				}
 				std::pair<int, int> lct = tempActor->getBoardPos();
-				board[lct.first][lct.second].second = EMPTY;
-				auto pos = tempActor->getHeroPos();
-				this->removeFromPositonVec(pos,vece);
-				numAI--;
+				board[lct.first][lct.second].second--;
+				if (board[lct.first][lct.second].second == EMPTY)
+				{
+					tempActor->changeHeroTag(TAG_UNATTACKED);
+				}
+				auto attackActor = dynamic_cast<HeroActor*>(tempBullet->getParent());
+				attackActor->enemyDied();
 			}
 			nodeB->removeFromParentAndCleanup(true);
 		}
@@ -627,17 +815,27 @@ bool HeroLayer::onContactBegin(cocos2d::PhysicsContact& contact)
 			auto tempActor = dynamic_cast<HeroActor*>(nodeB->getParent());
 			auto tempBullet = dynamic_cast<HeroBullet*>(nodeA->getParent());
 			tempActor->getDamaged(tempBullet->getBulletDamage());
-
 			if (!tempActor->isAlive)
 			{
-				auto attackActor = dynamic_cast<HeroActor*>(tempBullet->getParent());
-				tempActor->selfDied();
-				attackActor->enemyDied();
+				if (!tempActor->dieOnce)
+				{
+					tempActor->selfDied();				
+					auto pos = tempActor->getHeroPos();
+					this->removeFromVec(pos, vecAIHeroPos);
+					numAIHeros--;	
+					auto tlct = tempActor->getTargetBoardPos();
+					if (board[tlct.first][tlct.second].second != EMPTY)
+						board[tlct.first][tlct.second].second--;
+					tempActor->dieOnce = true;
+				}
 				std::pair<int, int> lct = tempActor->getBoardPos();
-				board[lct.first][lct.second].second = EMPTY;
-				auto pos = tempActor->getHeroPos();
-				this->removeFromPositonVec(pos, vece);
-				numAI--;
+				board[lct.first][lct.second].second--;
+				if (board[lct.first][lct.second].second == EMPTY)
+				{
+					tempActor->changeHeroTag(TAG_UNATTACKED);
+				}
+				auto attackActor = dynamic_cast<HeroActor*>(tempBullet->getParent());
+				attackActor->enemyDied();
 			}
 			nodeA->removeFromParentAndCleanup(true);
 		}
@@ -649,14 +847,25 @@ bool HeroLayer::onContactBegin(cocos2d::PhysicsContact& contact)
 
 			if (!tempActor->isAlive)
 			{
-				auto attackActor = dynamic_cast<HeroActor*>(tempBullet->getParent());
-				tempActor->selfDied();
-				attackActor->enemyDied();
+				if (!tempActor->dieOnce)
+				{
+					tempActor->selfDied();					
+					auto pos = tempActor->getHeroPos();
+					this->removeFromVec(pos, vecMyHeroPos);
+					numMyHeros--;
+					auto tlct = tempActor->getTargetBoardPos();
+					if (board[tlct.first][tlct.second].second != EMPTY)
+						board[tlct.first][tlct.second].second--;
+					tempActor->dieOnce = true;
+				}
 				std::pair<int, int> lct = tempActor->getBoardPos();
-				board[lct.first][lct.second].second = EMPTY;
-				auto pos = tempActor->getHeroPos();
-				this->removeFromPositonVec(pos, vecm);
-				numMy--;
+				board[lct.first][lct.second].second--;
+				if (board[lct.first][lct.second].second == EMPTY)
+				{
+					tempActor->changeHeroTag(TAG_UNATTACKED);
+				}
+				auto attackActor = dynamic_cast<HeroActor*>(tempBullet->getParent());
+				attackActor->enemyDied();
 			}
 			nodeB->removeFromParentAndCleanup(true);
 		}
@@ -665,17 +874,28 @@ bool HeroLayer::onContactBegin(cocos2d::PhysicsContact& contact)
 			auto tempActor = dynamic_cast<HeroActor*>(nodeB->getParent());
 			auto tempBullet = dynamic_cast<HeroBullet*>(nodeA->getParent());
 			tempActor->getDamaged(tempBullet->getBulletDamage());
-
 			if (!tempActor->isAlive)
-			{
-				auto attackActor = dynamic_cast<HeroActor*>(tempBullet->getParent());
-				tempActor->selfDied();				
-				attackActor->enemyDied();
+			{			
+				if (!tempActor->dieOnce)
+				{
+					tempActor->selfDied();
+					auto pos = tempActor->getHeroPos();
+					this->removeFromVec(pos, vecMyHeroPos);
+					numMyHeros--;
+					auto tlct = tempActor->getTargetBoardPos();
+					if (board[tlct.first][tlct.second].second != EMPTY)
+						board[tlct.first][tlct.second].second--;
+					tempActor->dieOnce = true;
+				}
 				std::pair<int, int> lct = tempActor->getBoardPos();
-				board[lct.first][lct.second].second = EMPTY;
-				auto pos = tempActor->getHeroPos();
-				this->removeFromPositonVec(pos, vecm);
-				numMy--;
+				board[lct.first][lct.second].second--;
+				if (board[lct.first][lct.second].second == EMPTY)
+				{
+					tempActor->changeHeroTag(TAG_UNATTACKED);
+				}
+				auto attackActor = dynamic_cast<HeroActor*>(tempBullet->getParent());
+				attackActor->enemyDied();				
+				
 			}
 			nodeA->removeFromParentAndCleanup(true);
 		}

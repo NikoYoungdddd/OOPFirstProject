@@ -55,6 +55,7 @@ public:
 
 	//暂时无用
 	void searchAgain(std::vector<HeroActor*>&vecHero,const std::vector<Vec2>& vecPos,const int side);
+<<<<<<< HEAD
 
 	//回到每局开始的位置
 	void boardReset(float dt);
@@ -66,6 +67,19 @@ public:
 
 	void updateHeros();
 
+=======
+
+	//回到每局开始的位置
+	void boardReset(float dt);
+	//空实现，配合调度器产生延时作用
+	void timeCountDown(float dt);
+
+
+	void updateEquipment();
+
+	void updateHeros();
+
+>>>>>>> main
 	void createEquipment(const Vec2& pos);
 
 
@@ -126,4 +140,5 @@ private:
 	unsigned int chosedHeroNo = 0;
 };
 #endif
+
 
