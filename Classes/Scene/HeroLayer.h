@@ -30,35 +30,35 @@ public:
 	void onTouchCancelled(cocos2d::Touch* touch, cocos2d::Event* unused_even);
 	bool onContactBegin(cocos2d::PhysicsContact& contact);
 
-	//ä»å®¹å™¨ä¸­åˆ é™¤å…ƒç´ 
+	//´ÓÈİÆ÷ÖĞÉ¾³ıÔªËØ
 	template<class T>
 	void removeFromVec(const T& pos, std::vector<T>& posVec);
 
-	//åˆ›å»ºè‹±é›„ï¼Œå‚æ•° ï¼šç§ç±»  ã€æ£‹ç›˜x  ã€æ£‹ç›˜y   ã€æ˜¯å¦ä¸ºæˆ‘æ–¹åˆ›å»º falseæ˜¯æ˜¯æˆ‘æ–¹åˆ›å»º
+	//´´½¨Ó¢ĞÛ£¬²ÎÊı £ºÖÖÀà  ¡¢ÆåÅÌx  ¡¢ÆåÅÌy   ¡¢ÊÇ·ñÎªÎÒ·½´´½¨ falseÊÇÊÇÎÒ·½´´½¨
 	void createHero(const int type, const int x, const int y, bool isAI);
 
 	void createHeroOnReady(const int type);
 	void createHeroOnBoard(HeroActor* hero, const int x, const int y);
 
-	//ä»…æµ‹è¯•ç”¨
+	//½ö²âÊÔÓÃ
 	void testCreate(float dt);
-	//äº§ç”Ÿä¸æˆ‘æ–¹ç›¸åŒä¸ªæ•°çš„è‹±é›„
+	//²úÉúÓëÎÒ·½ÏàÍ¬¸öÊıµÄÓ¢ĞÛ
 	void testAI(float dt);
-	//å¯ä¸€ç›´ç”¨
-	void allocateMyHero();  //æˆ‘æ–¹å…ˆæ‰‹
-	void allocateAIHero();  //æœªè¢«æˆ‘æ–¹é”å®šçš„æ£‹å­å¯ä»¥ç§»åŠ¨
-	//æ›´æ–°ä½ç½®å®¹å™¨
+	//¿ÉÒ»Ö±ÓÃ
+	void allocateMyHero();  //ÎÒ·½ÏÈÊÖ
+	void allocateAIHero();  //Î´±»ÎÒ·½Ëø¶¨µÄÆå×Ó¿ÉÒÔÒÆ¶¯
+	//¸üĞÂÎ»ÖÃÈİÆ÷
 	void updateHeroPos(bool isAI);
 
-	//å¼€å§‹æ–°çš„å›åˆ
+	//¿ªÊ¼ĞÂµÄ»ØºÏ
 	void startRound(float dt);
 
-	//æš‚æ—¶æ— ç”¨
+	//ÔİÊ±ÎŞÓÃ
 	void searchAgain(std::vector<HeroActor*>&vecHero,const std::vector<Vec2>& vecPos,const int side);
 
-	//å›åˆ°æ¯å±€å¼€å§‹çš„ä½ç½®
+	//»Øµ½Ã¿¾Ö¿ªÊ¼µÄÎ»ÖÃ
 	void boardReset(float dt);
-	//ç©ºå®ç°ï¼Œé…åˆè°ƒåº¦å™¨äº§ç”Ÿå»¶æ—¶ä½œç”¨
+	//¿ÕÊµÏÖ£¬ÅäºÏµ÷¶ÈÆ÷²úÉúÑÓÊ±×÷ÓÃ
 	void timeCountDown(float dt);
 
 
@@ -69,17 +69,17 @@ public:
 	void createEquipment(const Vec2& pos);
 
 
-	//ç›®å‰æ”¯æŒ
-	//3-4ä¸ªåœ¨å‡†å¤‡ä½ç½®
-	//1ä¸ªåœ¨æ£‹ç›˜ï¼Œ2ä¸ªå‡†å¤‡
-	//2ä¸ªåœ¨æ£‹ç›˜ï¼Œ1ä¸ªåœ¨å‡†å¤‡
+	//Ä¿Ç°Ö§³Ö
+	//3-4¸öÔÚ×¼±¸Î»ÖÃ
+	//1¸öÔÚÆåÅÌ£¬2¸ö×¼±¸
+	//2¸öÔÚÆåÅÌ£¬1¸öÔÚ×¼±¸
 	void heroStarsUP();
 	
 public:
 	std::pair<Vec2, int> board[8][8];
 	std::pair<Vec2, int> readyPos[8];
 	std::pair<Vec2, int> equipmentPos[8];
-	bool isUpdate = false;  //æ›´æ–°è¡€æ¡
+	bool isUpdate = false;  //¸üĞÂÑªÌõ
 	float deltaX;
 	float deltaY;
 	std::vector<HeroActor*>vecHeroOnReady;
@@ -94,15 +94,15 @@ public:
 	unsigned int AIExp = 0;
 	unsigned int AILevel = 1;
 private:
-	std::vector<Vec2> vecAIHeroPos;  //æ•Œæ–¹ä½ç½®
-	std::vector<Vec2> vecMyHeroPos;  //æˆ‘æ–¹ä½ç½®
-	std::vector<HeroActor*> vecMyHeros;  //æˆ‘æ–¹
-	std::vector<HeroActor*> vecAIHeros;  //æ•Œæ–¹	
+	std::vector<Vec2> vecAIHeroPos;  //µĞ·½Î»ÖÃ
+	std::vector<Vec2> vecMyHeroPos;  //ÎÒ·½Î»ÖÃ
+	std::vector<HeroActor*> vecMyHeros;  //ÎÒ·½
+	std::vector<HeroActor*> vecAIHeros;  //µĞ·½	
 	int numMyHeros = 0;
 	int numAIHeros = 0;
 
-	//ä»…åœ¨resetç”¨
-	std::vector<Vec2>vecMyHeroReset;  //ä¿å­˜æ¯å±€å¼€å§‹å‰çš„ä½ç½®
+	//½öÔÚresetÓÃ
+	std::vector<Vec2>vecMyHeroReset;  //±£´æÃ¿¾Ö¿ªÊ¼Ç°µÄÎ»ÖÃ
 	std::vector<std::pair<int, int>>vecMyHeroBoardPos;
 	std::vector<Vec2>vecAIHeroReset;
 	std::vector<std::pair<int, int>>vecAIHeroBoardPos;
@@ -126,5 +126,4 @@ private:
 	unsigned int chosedHeroNo = 0;
 };
 #endif
-
 

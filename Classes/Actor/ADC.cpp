@@ -6,43 +6,43 @@ ADC::ADC()
 	this->m_Status.m_Damage.m_PowerDamage = 200;
 	this->m_Status.m_Defense.m_PhysicalDefense = 70;
 	this->m_Status.m_Defense.m_PowerDefense = 100;
-	this->m_Status.m_AttackFrequency = 2;
+	this->m_Status.m_AttackFrequency = 20;
 	this->m_Type = Type_ADC;
 	this->m_Cost = 2;
+	this->m_Star = 1;
 	boardX = -1;
 	boardY = -1;
 }
 
 void ADC::searchEnemy(std::pair<Vec2, int>(&board)[8][8], const bool stay)
-{
-	auto winSize = Director::getInstance()->getWinSize();
-	Vec2 origin = Director::getInstance()->getVisibleOrigin();
-
-
+{	
 	Vec2 startDest = myHero->getPosition();
 	Vec2 endDest = *(vecPos.begin());
 	Vec2 stayPos = startDest;
 	float shortestLen = sqrt((startDest.x - endDest.x) * (startDest.x - endDest.x) +
 		(startDest.y - endDest.y) * (startDest.y - endDest.y));
-
-	int randS = vecPos.size();
-	srand((unsigned)(time(nullptr)));
-	int randM = rand() % randS;
-
-	endDest = vecPos[randM];
-	float len = sqrt((startDest.x - endDest.x) * (startDest.x - endDest.x) +
-		(startDest.y - endDest.y) * (startDest.y - endDest.y));
-	int flag = 1;
 	if (!stay)
 	{
+		int randS = vecPos.size();
+		srand((unsigned)(time(nullptr)));
+		int randM = rand() % randS;
+		endDest = vecPos[randM];
+		float len = sqrt((startDest.x - endDest.x) * (startDest.x - endDest.x) +
+			(startDest.y - endDest.y) * (startDest.y - endDest.y));
+		
+		int flag = 1;
+		board[boardX][boardY].second = EMPTY;
 		for (int i = 0; i < 8 && flag; i++)
 		{
 			for (int j = 0; j < 8 && flag; j++)
 			{
 				if (board[i][j].first == endDest)
 				{
-					board[i][j].second = LOCKED;
-					//for (int k = 0; k < 5; k++)
+					targetBoardPosX = i;
+					targetBoardPosY = j;
+					if (board[i][j].second == OCCUPIED)
+						board[i][j].second = EMPTY;
+					board[i][j].second ++;
 					while (1)
 					{
 						int randP = rand() % 10;
@@ -62,16 +62,46 @@ void ADC::searchEnemy(std::pair<Vec2, int>(&board)[8][8], const bool stay)
 				}
 			}
 		}
+		
+	}
+	else
+	{
+		for (auto i : vecPos)
+		{
+			auto tempDest = i;
+			float len = sqrt((startDest.x - tempDest.x) * (startDest.x - tempDest.x) +
+				(startDest.y - tempDest.y) * (startDest.y - tempDest.y));
+			if (len < shortestLen)
+			{
+				shortestLen = len;
+				endDest = tempDest;
+			}
+		}
+		int flag = 1;
+		for (int i = 0; i < 8 && flag; i++)
+		{
+			for (int j = 0; j < 8 && flag; j++)
+			{
+				if (board[i][j].first == endDest)
+				{
+					targetBoardPosX = i;
+					targetBoardPosY = j;
+					if (board[i][j].second == OCCUPIED)
+						board[i][j].second = EMPTY;
+					board[i][j].second++;
+					flag = 0;
+				}
+			}
+		}
 	}
 	targetPos = endDest;
 	attackPos = stayPos;
 	moveDuration = shortestLen / SPEED;
 }
 
-void ADC::attack(float ft, const bool stay)
+void ADC::attack(const bool stay)
 {
 	float ff = ATTACK_DURATION_MARK / m_Status.m_AttackFrequency;
-
 	auto shoot = CallFunc::create([=]() {
 		auto attackBullet = HeroBullet::create(heroBulletName[m_Type], this->m_Status.m_Damage);
 		attackBullet->setBulletPos(myHero->getPosition());
@@ -86,18 +116,16 @@ void ADC::attack(float ft, const bool stay)
 		});
 
 	auto delay_t = DelayTime::create(ff);
-	auto shootArray = Repeat::create(Sequence::create(delay_t, shoot, nullptr), 10);
-	
+	auto shootArray = Repeat::create(Sequence::create(delay_t, shoot, nullptr), 20);
+	//auto shootArray = RepeatForever::create(Sequence::create(delay_t, shoot, nullptr));
 
-	if (isEnemy && targetPos.x - attackPos.x > 0)
+	if (targetPos.x - attackPos.x > 0.00001f)
 	{
-		myHero->setFlippedX(!isFliped);
-		isFliped = (!isFliped);
+		this->setOrientation(TO_RIGHT);
 	}
-	else if (!isEnemy && targetPos.x - attackPos.x < 0)
+	else if (targetPos.x - attackPos.x < -0.00001f)
 	{
-		myHero->setFlippedX(!isFliped);
-		isFliped = (!isFliped);
+		this->setOrientation(TO_LEFT);
 	}
 	if (!stay)
 	{

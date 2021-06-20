@@ -1,4 +1,3 @@
-
 #include "HeroLayer.h"
 
 HeroLayer::HeroLayer()
@@ -486,11 +485,11 @@ void HeroLayer::updateHeros()
 				Player::getInstance()->playerHP -= 5;
 				AIGold += 5;
 			}
-			
+			Player::getInstance()->playerExp += 2;
 
 			isUpdate = false;
 			createEquipment(board[5][5].first);
-			//å®šæ—¶å™¨æ˜¯åŒæ—¶å¼€å§‹çš„
+			//¶¨Ê±Æ÷ÊÇÍ¬Ê±¿ªÊ¼µÄ
 			scheduleOnce(CC_SCHEDULE_SELECTOR(HeroLayer::boardReset), ROUND_END_TIME);
 			scheduleOnce(CC_SCHEDULE_SELECTOR(HeroLayer::testAI), 5.0f);
 			scheduleOnce(CC_SCHEDULE_SELECTOR(HeroLayer::startRound), ROUND_END_TIME + PREPARE_TIME);
@@ -521,7 +520,8 @@ void HeroLayer::updateEquipment()
 			std::string eName = equip->getEquipment();
 			Sprite* equipSprite = Sprite::create(eName);
 			equipSprite->setScale(EQUIPMENT_SCALE);
-			equipSprite->setPosition(Vec2(98 * 2.5f + eqpnum * 25 + 25 / 2, 98 * 10 - 25 / 2)); eqpnum++;
+			equipSprite->setPosition(Vec2(98 * .5f, 98.f * ((8 - eqpnum) + 1.5f)));
+			eqpnum++;
 			this->addChild(equipSprite);
 			vecEquipment.push_back(equipSprite);
 			vecEquipmentName.push_back(eName);
@@ -652,20 +652,20 @@ void HeroLayer::onTouchMoved(cocos2d::Touch* touch, cocos2d::Event* unused_event
 		auto visibleSize = Director::getInstance()->getVisibleSize();
 		auto origin = Director::getInstance()->getVisibleOrigin();
 		auto hSize = touchedHero->getHeroSize() * HERO_SCALE;
-		float x = touchLocation.x - deltaX;//è¨˜å¾—æ¸›å»åç§»é‡
+		float x = touchLocation.x - deltaX;//Ó›µÃœpÈ¥Æ«ÒÆÁ¿
 		float y = touchLocation.y - deltaY;
 
-		if (x <= hSize.width / 2 + origin.x)//xåˆ°è¾¾å±å¹•å·¦è¾¹ç•Œ
+		if (x <= hSize.width / 2 + origin.x)//xµ½´ïÆÁÄ»×ó±ß½ç
 			x = hSize.width / 2 + origin.x;
-		else if (x >= visibleSize.width - hSize.width / 2)//xåˆ°è¾¾å±å¹•å³è¾¹ç•Œ
+		else if (x >= visibleSize.width - hSize.width / 2)//xµ½´ïÆÁÄ»ÓÒ±ß½ç
 			x = visibleSize.width - hSize.width / 2;
 
-		if (y <= hSize.height / 2 + origin.y)//yåˆ°è¾¾å±å¹•ä¸‹è¾¹ç•Œ
+		if (y <= hSize.height / 2 + origin.y)//yµ½´ïÆÁÄ»ÏÂ±ß½ç
 			y = hSize.height / 2 + origin.y;
-		else if (y >= visibleSize.height - hSize.height / 2)//xåˆ°è¾¾å±å¹•ä¸Šè¾¹ç•Œ
+		else if (y >= visibleSize.height - hSize.height / 2)//xµ½´ïÆÁÄ»ÉÏ±ß½ç
 			y = visibleSize.height - hSize.height / 2;
 
-		//é£æœºè·Ÿéšæ‰‹æŒ‡ç§»åŠ¨
+		//·É»ú¸úËæÊÖÖ¸ÒÆ¶¯
 		touchedHero->setHeroPos(Vec2(x, y));
 	}
 
@@ -688,7 +688,7 @@ void HeroLayer::onTouchMoved(cocos2d::Touch* touch, cocos2d::Event* unused_event
 		else if (y >= visibleSize.height - eSize.height / 2)
 			y = visibleSize.height - eSize.height / 2;
 
-		//é£æœºè·Ÿéšæ‰‹æŒ‡ç§»åŠ¨
+		//·É»ú¸úËæÊÖÖ¸ÒÆ¶¯
 		touchedEquipment->setPosition(Vec2(x, y));
 	}
 

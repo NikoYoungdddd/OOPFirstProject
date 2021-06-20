@@ -2,7 +2,7 @@
 #define __HERO_PURCHASE_H__
 
 #include"Const/Const.h"
-
+#include"Player.h"
 class HeroPurchase :public Node
 {
 public:
