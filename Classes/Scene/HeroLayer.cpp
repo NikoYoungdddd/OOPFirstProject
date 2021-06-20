@@ -1,5 +1,8 @@
 #include "HeroLayer.h"
-
+extern bool ifBgmOn;
+extern bool ifFinallyEnd;
+int ifBattleBgmOn = 0;
+bool IfReAddPrepareTime = 0;
 HeroLayer::HeroLayer()
 {
 	for (int i = 0; i < 8; i++)
@@ -70,8 +73,8 @@ void HeroLayer::testCreate(float dt)
 
 void HeroLayer::testAI(float dt)
 {
-	if (numMyHeros != numAIHeros)
-		for (int i = 0; i <= numMyHeros - numAIHeros;)
+	//if (numMyHeros != numAIHeros)
+		for (int i = 0; i <= 1;)
 		{
 
 			int aitype = rand() % 5;
@@ -113,6 +116,7 @@ void  HeroLayer::createHeroOnReady(const int type)
 				break;
 			}
 		}
+		arrayHeroNum[type]++;
 		hero->setHeroPos(pos);
 		this->addChild(hero);
 		vecHeroOnReady.push_back(hero);
@@ -169,6 +173,149 @@ void HeroLayer::createHero(const int type, const int x, const int y, bool isAI)
 	}
 }
 
+void HeroLayer::heroStarsUP()
+{
+	int numOnBoard = 0, numOnReady = 0;
+	int herotype = 6;
+	for (int type = 0; type < 5; type++)
+	{
+		if (arrayHeroNum[type] >= 3)
+		{
+			herotype = type;
+			for (auto hero : vecMyHeros)
+			{
+				if (hero->m_Type == type && hero->m_Star == 1)
+				{
+					numOnBoard++;
+				}
+			}
+			for (auto hero : vecHeroOnReady)
+			{
+				if (hero->m_Type == type && hero->m_Star == 1)
+				{
+					numOnReady++;
+				}
+			}
+			if (numOnBoard + numOnReady >= 3)
+				arrayHeroNum[herotype] -= 2;
+			break;
+		}
+	}
+	if (numOnBoard + numOnReady >= 3)
+	{
+		if (numOnBoard != 0)
+		{
+			if (numOnBoard == 1)
+			{
+				for (auto &hero : vecMyHeros)
+				{
+					if (hero->m_Type == herotype && hero->m_Star == 1)
+					{
+						hero->starsUP();
+						break;
+					}
+				}
+				int n = 0, i = 0;
+				int arr[5]{};
+				for (auto hero : vecHeroOnReady)
+				{					
+					if (hero->m_Type == herotype && hero->m_Star == 1)
+					{
+						arr[n++] = i;
+						if (n <= 2)
+						{
+							auto pos = hero->getBoardPos();
+							readyPos[pos.second].second = EMPTY;
+							this->removeChild(hero);
+						}
+					}
+					i++;
+				}
+				vecHeroOnReady.erase(vecHeroOnReady.begin() + arr[1]);
+				vecHeroOnReady.erase(vecHeroOnReady.begin() + arr[0]);
+			}
+			else if (numOnBoard == 2)
+			{
+				int n = 0, i = 0;
+				int arr[5]{};
+				bool isFind = false;
+				for (auto& hero : vecMyHeros)
+				{
+					if (!isFind)
+					{
+						if (hero->m_Type == herotype && hero->m_Star == 1)
+						{
+							isFind = true;
+							arr[n++] = i;
+						}
+					}
+					else
+					{
+						if (hero->m_Type == herotype && hero->m_Star == 1)
+						{
+							arr[n++] = i;
+							if (n <= 2)
+							{
+								auto pos = hero->getBoardPos();
+								board[pos.first][pos.second].second = EMPTY;
+								this->removeChild(hero);
+							}
+						}
+					}
+					i++;
+				}
+				vecMyHeros.erase(vecMyHeros.begin() + arr[1]);
+
+				int m = 0;
+				for (auto &hero : vecHeroOnReady)
+				{
+					if (hero->m_Type == herotype && hero->m_Star == 1)
+					{
+						this->removeChild(hero);
+						break;
+					}
+					m++;
+				}
+				vecHeroOnReady.erase(vecHeroOnReady.begin() + m);
+			}
+		}
+		else
+		{
+			bool isFind = false;
+			int arr[8]{};
+			int n = 0, i = 0;
+			for (auto& hero : vecHeroOnReady)
+			{			
+				if (!isFind)
+				{
+					if (hero->m_Type == herotype && hero->m_Star == 1)
+					{
+						isFind = true;
+						arr[n++] = i;
+					}
+				}
+				else
+				{
+					if (hero->m_Type == herotype && hero->m_Star == 1)
+					{
+						arr[n++] = i;
+						if (n <= 3)
+						{
+							auto pos = hero->getBoardPos();
+							readyPos[pos.second].second = EMPTY;
+							this->removeChild(hero);
+						}
+					}
+				}
+				i++;
+			}
+			vecHeroOnReady.erase(vecHeroOnReady.begin() + arr[2]);
+			vecHeroOnReady.erase(vecHeroOnReady.begin() + arr[1]);
+			vecHeroOnReady[arr[0]]->starsUP();
+		}
+	}
+}
+
 void  HeroLayer::updateHeroPos(bool isAI)
 {
 	if (!isAI)
@@ -201,6 +348,7 @@ void HeroLayer::allocateMyHero()
 		hero->searchEnemy(board);
 		hero->attack();
 	}
+
 }
 
 void HeroLayer::allocateAIHero()
@@ -224,15 +372,33 @@ void HeroLayer::allocateAIHero()
 		vecAIHeroPos.push_back(hero->getHeroPos());		
 	}
 }
-
+/*下面2个函数做了修改*/
 void HeroLayer::startRound(float dt)
 {
+	if (ifBgmOn)
+	{
+		ifBattleBgmOn = 1;
+		bgmBattle = AudioEngine::play2d(BGM_ATTACK,true, 0.5f);
+	}
+	else
+	{
+		ifBattleBgmOn = 1;
+		bgmBattle = AudioEngine::play2d(BGM_ATTACK, true, .0);
+	}
+	touchListener->setEnabled(false);
+	auto visibleSize = Director::getInstance()->getVisibleSize();
+	labelBattleTime = Label::createWithTTF(StringUtils::format("In Battle : %d second", ROUND_TIME), "fonts/Marker Felt.ttf", 28);
+	labelBattleTime->setPosition(Vec2(visibleSize.width / 2,
+		visibleSize.height - labelBattleTime->getContentSize().height));
+	this->addChild(labelBattleTime);
+	schedule(CC_SCHEDULE_SELECTOR(HeroLayer::countDownBattleTime), 1.0f);
 	allocateMyHero();
 	allocateAIHero();
 }
 
 void HeroLayer::boardReset(float dt)
 {
+	touchListener->setEnabled(true);
 	int n = 0, m = 0;
 	for (auto& hero : vecMyHeros)
 	{
@@ -272,17 +438,44 @@ void HeroLayer::boardReset(float dt)
 	}
 	
 	isStartNewRound = true;
+	auto visibleSize = Director::getInstance()->getVisibleSize();
+	labelPrepareTime = Label::createWithTTF(StringUtils::format("In Preparation : %d second", PREPARE_TIME), 
+		"fonts/Marker Felt.ttf", 28);
+	labelPrepareTime->setPosition(Vec2(visibleSize.width / 2,
+		visibleSize.height - labelPrepareTime->getContentSize().height));
+	this->addChild(labelPrepareTime);
+	schedule(CC_SCHEDULE_SELECTOR(HeroLayer::countDownPrepareTime), 1.0f/60);
 }
 
 void HeroLayer::timeCountDown(float dt)
 {
+	touchListener->setEnabled(true);
 //	isGameStart = true;
 }
-
+/*已修改*/
 void HeroLayer::updateHeros()
 {
-	if (isUpdate)
+	if (!isGameStart)//进入游戏为true
 	{
+		isGameStart = true;
+		auto visibleSize = Director::getInstance()->getVisibleSize();
+		labelPrepareTime = Label::createWithTTF(StringUtils::format("In Preparation : %d second", PREPARE_TIME),
+			"fonts/Marker Felt.ttf", 28);
+		labelPrepareTime->setPosition(Vec2(visibleSize.width / 2,
+			visibleSize.height - labelPrepareTime->getContentSize().height));
+		this->addChild(labelPrepareTime);
+		schedule(CC_SCHEDULE_SELECTOR(HeroLayer::countDownPrepareTime), 1.0f/60);
+		scheduleOnce(CC_SCHEDULE_SELECTOR(HeroLayer::timeCountDown), ROUND_END_TIME * 2);
+		scheduleOnce(CC_SCHEDULE_SELECTOR(HeroLayer::createAIHeros), ROUND_END_TIME * 3);
+		scheduleOnce(CC_SCHEDULE_SELECTOR(HeroLayer::startRound), ROUND_END_TIME * 4);
+	}
+	if (isUpdate)//开始打，移动
+	{
+
+		if (vecMyHeros.empty())
+		{
+			return;
+		}
 		for (auto& hero : vecMyHeros)
 		{
 			if (nullptr != hero)
@@ -329,32 +522,81 @@ void HeroLayer::updateHeros()
 		}
 		if (numAIHeros == 0 || numMyHeros == 0)
 		{
+			AudioEngine::stop(bgmBattle);
+			if (numMyHeros == 0)
+			{
+				Player::getInstance()->playerGold += 1;
+				Player::getInstance()->playerHP -= 5;
+				AIGold += 3;
+				AIExp++;
+				showResultPerTime(0);
+			}
+			else
+			{
+				Player::getInstance()->playerGold += 3;
+				Player::getInstance()->enemyHP -= 5;
+				AIGold += 1;
+				Player::getInstance()->playerExp++;
+				createEquipment(board[5][5].first);
+				showResultPerTime(1);
+			}
+
 			isUpdate = false;
-			createEquipment(board[5][5].first);
 			//定时器是同时开始的
-			scheduleOnce(CC_SCHEDULE_SELECTOR(HeroLayer::boardReset), ROUND_END_TIME);
-			scheduleOnce(CC_SCHEDULE_SELECTOR(HeroLayer::testAI), 5.0f);
-			scheduleOnce(CC_SCHEDULE_SELECTOR(HeroLayer::startRound), ROUND_END_TIME + PREPARE_TIME);
+			if (Player::getInstance()->playerHP <= 0 || Player::getInstance()->enemyHP <= 0)
+			{
+				ifFinallyEnd = 1;
+			}
+			if (Player::getInstance()->playerHP > 0)
+			{
+				scheduleOnce(CC_SCHEDULE_SELECTOR(HeroLayer::boardReset), ROUND_END_TIME);
+				scheduleOnce(CC_SCHEDULE_SELECTOR(HeroLayer::createAIHeros), ROUND_END_TIME);
+				scheduleOnce(CC_SCHEDULE_SELECTOR(HeroLayer::startRound), ROUND_END_TIME + PREPARE_TIME);
+			}
+			
 		}
 	}
-	if (!isGameStart)
-	{
-		isGameStart = true;
-		scheduleOnce(CC_SCHEDULE_SELECTOR(HeroLayer::timeCountDown), ROUND_END_TIME*2);
-		scheduleOnce(CC_SCHEDULE_SELECTOR(HeroLayer::testAI), ROUND_END_TIME * 3);
-		scheduleOnce(CC_SCHEDULE_SELECTOR(HeroLayer::startRound), ROUND_END_TIME * 4);
-	}
+
+
+	
 }
 
 void  HeroLayer::createEquipment(const Vec2& pos)
 {
-	auto equip = Equipment::create(pos);
+	/*auto equip = Equipment::create(pos);
 	this->addChild(equip);
-	vecEquipmentUncollected.push_back(equip);
+	vecEquipmentUncollected.push_back(equip);*/
+	if (buffNum < MAX_BUFF_NUM)
+	{
+		auto equip = Equipment::create(board[buffNum + 1][7].first);
+		this->addChild(equip);
+		vecEquipmentUncollected.push_back(equip);
+		buffNum++;
+	}
 }
 
 void HeroLayer::updateEquipment()
 {
+	//for (auto& equip : vecEquipmentUncollected)
+	//{
+	//	if (equip != nullptr && equip->isMoved)
+	//	{
+	//		std::string eName = equip->getEquipment();
+	//		Sprite* equipSprite = Sprite::create(eName);
+	//		equipSprite->setScale(EQUIPMENT_SCALE);
+	//		equipSprite->setPosition(Vec2(98 * 2.5f + eqpnum * 25 + 25 / 2, 98 * 10 - 25 / 2));
+	//		eqpnum++;
+	//		Player::getInstance()->playerGold -= 2;
+	//		this->addChild(equipSprite);
+	//		vecEquipment.push_back(equipSprite);
+	//		vecEquipmentName.push_back(eName);
+	//		equip->isMoved = false;
+	//		//this->removeFromVec(equip, vecEquipmentUncollected);
+	//		this->removeChild(equip);			
+	//	}
+	//}
+	unsigned int n = 0;
+	bool isRemove = false;
 	for (auto& equip : vecEquipmentUncollected)
 	{
 		if (equip != nullptr && equip->isMoved)
@@ -362,16 +604,22 @@ void HeroLayer::updateEquipment()
 			std::string eName = equip->getEquipment();
 			Sprite* equipSprite = Sprite::create(eName);
 			equipSprite->setScale(EQUIPMENT_SCALE);
-			equipSprite->setPosition(Vec2(98 * 2.5f+ eqpnum*25+25/2, 98*10-25/2 ));
-			//此处做了改变
-			eqpnum++;
+			equipSprite->setPosition(Vec2(98 * 2.5f + eqpnum * 25 + 25 / 2, 98 * 10 - 25 / 2)); eqpnum++;
 			this->addChild(equipSprite);
 			vecEquipment.push_back(equipSprite);
 			vecEquipmentName.push_back(eName);
 			equip->isMoved = false;
-			this->removeFromVec(equip, vecEquipmentUncollected);
-			this->removeChild(equip);			
+			isRemove = true;
+			this->removeChild(equip);
+			break;
 		}
+		n++;
+	}
+	if (isRemove)
+	{
+		isRemove = false;
+		if (n < vecEquipmentUncollected.size())
+			vecEquipmentUncollected.erase(vecEquipmentUncollected.begin() + n);
 	}
 }
 bool HeroLayer::init()
@@ -382,7 +630,7 @@ bool HeroLayer::init()
 	}
 	
 	
-	createEquipment(board[5][5].first);
+	//createEquipment(board[5][5].first);
 	//scheduleOnce(CC_SCHEDULE_SELECTOR(HeroLayer::testCreate), 5.0f);
 	//scheduleOnce(CC_SCHEDULE_SELECTOR(HeroLayer::startRound), 10.0f);
 	this->scheduleUpdate();
@@ -390,7 +638,7 @@ bool HeroLayer::init()
 	auto contactListener = EventListenerPhysicsContact::create();
 	contactListener->onContactBegin = CC_CALLBACK_1(HeroLayer::onContactBegin, this);
 	_eventDispatcher->addEventListenerWithSceneGraphPriority(contactListener, this);
-	auto touchListener = EventListenerTouchOneByOne::create();
+	touchListener = EventListenerTouchOneByOne::create();
 	touchListener->onTouchBegan = CC_CALLBACK_2(HeroLayer::onTouchBegan, this);
 	touchListener->onTouchMoved = CC_CALLBACK_2(HeroLayer::onTouchMoved, this);
 	touchListener->onTouchEnded = CC_CALLBACK_2(HeroLayer::onTouchEnded, this);
@@ -421,8 +669,23 @@ HeroLayer* HeroLayer::create()
 
 void HeroLayer::update(float ft)
 {
+	heroStarsUP();
 	updateEquipment();
 	updateHeros();
+	AIHeroStarsUP();
+	if (!ifBgmOn)
+	{
+		AudioEngine::setVolume(bgmBattle,.0);
+	}
+	else
+	{
+		AudioEngine::setVolume(bgmBattle, 0.5);
+	}
+	if (IfReAddPrepareTime)
+	{
+		addLablePrepareTime();
+		IfReAddPrepareTime = 0;
+	}
 }
 
 bool HeroLayer::onTouchBegan(cocos2d::Touch* touch, cocos2d::Event* unused_event)
@@ -549,25 +812,30 @@ void HeroLayer::onTouchEnded(cocos2d::Touch* touch, cocos2d::Event* unused_event
 				if (playerLocation.x > (board[i][j].first.x - 49) && playerLocation.x < (board[i][j].first.x + 49) &&
 					playerLocation.y >(board[i][j].first.y - 49) && playerLocation.y < (board[i][j].first.y + 49))
 				{
-					if (!board[i][j].second)
+					if (Player::getInstance()->playerGrade - numMyHeros >= 1)
 					{
-						auto pos =touchedHero->getBoardPos();
-						if (pos.first == -1)
-							readyPos[pos.second].second = EMPTY;
-						if (board[i][j].second == EMPTY)
+
+
+						if (!board[i][j].second)
 						{
-							createHeroOnBoard(touchedHero,i,j);
-							//touchedHero->setHeroPos(board[i][j].first);
-							//board[i][j].second = OCCUPIED;
-							//touchedHero->setBoardPos(i, j);
-							//vecMyHeros.push_back(touchedHero);
-							isBack = false;
-							if (chosedHeroNo == 0)
-								vecHeroOnReady.erase((vecHeroOnReady.begin()));
-							else if (chosedHeroNo <= vecHeroOnReady.size())
-								vecHeroOnReady.erase((vecHeroOnReady.begin() + chosedHeroNo - 1));
-							chosedHeroNo = 999;
-							break;
+							auto pos = touchedHero->getBoardPos();
+							if (pos.first == -1)
+								readyPos[pos.second].second = EMPTY;
+							if (board[i][j].second == EMPTY)
+							{
+								createHeroOnBoard(touchedHero, i, j);
+								//touchedHero->setHeroPos(board[i][j].first);
+								//board[i][j].second = OCCUPIED;
+								//touchedHero->setBoardPos(i, j);
+								//vecMyHeros.push_back(touchedHero);
+								isBack = false;
+								if (chosedHeroNo == 0)
+									vecHeroOnReady.erase((vecHeroOnReady.begin()));
+								else if (chosedHeroNo <= vecHeroOnReady.size())
+									vecHeroOnReady.erase((vecHeroOnReady.begin() + chosedHeroNo - 1));
+								chosedHeroNo = 999;
+								break;
+							}
 						}
 					}
 				}
@@ -741,6 +1009,303 @@ bool HeroLayer::onContactBegin(cocos2d::PhysicsContact& contact)
 			}
 			nodeA->removeFromParentAndCleanup(true);
 		}
+		else if (tagA == TAG_AISIDE && tagB == TAG_MY_SECOND_BULLET)
+		{
+		auto tempActor = dynamic_cast<HeroActor*>(nodeA->getParent());
+		auto tempBullet = dynamic_cast<HeroBullet*>(nodeB->getParent());
+		tempActor->getDamaged(tempBullet->getBulletDamage());
+		nodeB->removeFromParentAndCleanup(true);
+		}
+		else if (tagB == TAG_AISIDE && tagA == TAG_MY_SECOND_BULLET)
+		{
+		auto tempActor = dynamic_cast<HeroActor*>(nodeB->getParent());
+		auto tempBullet = dynamic_cast<HeroBullet*>(nodeA->getParent());
+		tempActor->getDamaged(tempBullet->getBulletDamage());
+		nodeA->removeFromParentAndCleanup(true);
+		}
+		else if (tagA == TAG_MYSIDE && tagB == TAG_AI_SECOND_BULLET)
+		{
+		auto tempActor = dynamic_cast<HeroActor*>(nodeA->getParent());
+		auto tempBullet = dynamic_cast<HeroBullet*>(nodeB->getParent());
+		tempActor->getDamaged(tempBullet->getBulletDamage());
+		nodeB->removeFromParentAndCleanup(true);
+		}
+		else if (tagB == TAG_MYSIDE && tagA == TAG_AI_SECOND_BULLET)
+		{
+		auto tempActor = dynamic_cast<HeroActor*>(nodeB->getParent());
+		auto tempBullet = dynamic_cast<HeroBullet*>(nodeA->getParent());
+		tempActor->getDamaged(tempBullet->getBulletDamage());
+		nodeA->removeFromParentAndCleanup(true);
+		}
 	}
 	return true;
+}
+
+void HeroLayer::createAIHeros(float dt)
+{
+	if (AIGrade < 5 && AIGold > static_cast<int>(playerExpPerGrade[AIGrade - 1]) - AIExp)
+	{
+		AIGold -= static_cast<int>(playerExpPerGrade[AIGrade - 1]);
+		AIExp = 0;
+		AIGrade++;
+	}
+
+	if (AIGrade >= 5 && (AIGrade - numAIHeros) == 0)
+	{
+		AIHeroCreateStarsUP();
+	}
+
+	int num = AIGrade - numAIHeros;
+	if (num >= 1)
+	{
+		for (int i = 0; i < num;)
+		{
+			int t = 0;
+			for (int n = 0; n < 5; n++)
+			{
+				if (AIGold >= heroPrice[n])
+					t++;
+			}
+			if (t == 0)
+				return;
+			int aitype = rand() % 5;
+			if (AIGold >= heroPrice[aitype])
+			{
+				int aix = rand() % 3 + 4;
+				int aiy = rand() % 4 + 2;
+				if (!board[aix][aiy].second)
+				{
+					i++;
+					createHero(aitype, aix, aiy, true);
+					arrayAIHeroNum[aitype]++;
+					AIGold -= heroPrice[aitype];
+					board[aix][aiy].second = OCCUPIED;
+				}
+			}
+		}
+	}
+}
+
+void HeroLayer::AIHeroStarsUP()
+{
+	bool isStarsUp = false;
+	unsigned int num = 0, herotype = 6;
+	for (int type = 0; type < 5; type++)
+	{
+		if (arrayAIHeroNum[type] >= 3)
+		{
+			for (auto hero : vecAIHeros)
+			{
+				if (hero->m_Type == type && hero->m_Star == 1)
+				{
+					herotype = type;
+					num++;
+				}
+			}
+		}
+	}
+
+	if (num >= 3)
+	{
+		bool isFind = false;
+		unsigned int arr[8]{}, n = 0, i = 0;
+		for (auto& hero : vecAIHeros)
+		{
+			if (!isFind)
+			{
+				if (hero->m_Type == herotype && hero->m_Star == 1)
+				{
+					isFind = true;
+					hero->starsUP();
+					arr[n++] = i;
+				}
+			}
+			else
+			{
+				if (hero->m_Type == herotype && hero->m_Star == 1)
+				{
+					arr[n++] = i;
+					if (n <= 3)
+					{
+						auto pos = hero->getBoardPos();
+						board[pos.first][pos.second].second = EMPTY;
+						this->removeChild(hero);
+					}
+				}
+			}
+			i++;
+		}
+		if (arr[2] <= vecAIHeroReset.size())
+		{
+			vecAIHeroBoardPos.erase(vecAIHeroBoardPos.begin() + arr[2]);
+			vecAIHeroBoardPos.erase(vecAIHeroBoardPos.begin() + arr[1]);
+			vecAIHeroPos.erase(vecAIHeroPos.begin() + arr[2]);
+			vecAIHeroPos.erase(vecAIHeroPos.begin() + arr[1]);
+			vecAIHeroReset.erase(vecAIHeroReset.begin() + arr[2]);
+			vecAIHeroReset.erase(vecAIHeroReset.begin() + arr[1]);
+			vecAIHeros.erase(vecAIHeros.begin() + arr[2]);
+			vecAIHeros.erase(vecAIHeros.begin() + arr[1]);
+			numAIHeros -= 2;
+		}
+	}
+}
+void  HeroLayer::AIHeroCreateStarsUP()
+{
+	bool isFind = false;
+	for (int type = 0; type < 5; type++)
+	{
+		int num = 0;
+		if (arrayAIHeroNum[type] == 2)
+		{
+			unsigned int arr[2] = { 0 }, i = 0;
+			for (auto hero : vecAIHeros)
+			{
+				if (hero->m_Type == type && hero->m_Star == 1)
+				{
+					arr[num++] = i;
+				}
+				i++;
+			}
+			if (num == 2 && AIGold >= heroPrice[type])
+			{
+				isFind = true;
+				numAIHeros--;
+				AIGold -= heroPrice[type];
+
+				if (arr[1] <= vecAIHeroBoardPos.size())
+				{
+					vecAIHeros[arr[0]]->starsUP();
+					vecAIHeros.erase(vecAIHeros.begin() + arr[1]);
+					vecAIHeroBoardPos.erase(vecAIHeroBoardPos.begin() + arr[1]);
+					vecAIHeroPos.erase(vecAIHeroPos.begin() + arr[1]);
+					vecAIHeroReset.erase(vecAIHeroReset.begin() + arr[1]);
+				}
+			}
+		}
+	}
+
+	if (!isFind)
+	{
+		for (int type = 0; type < 5; type++)
+		{
+			int num = 0;
+			if (arrayAIHeroNum[type] == 1)
+			{
+				unsigned int arr[2] = {}, j = 0, n = 0;
+				for (auto hero : vecAIHeros)
+				{
+					if (hero->m_Type == type && hero->m_Star == 1)
+					{
+						arr[num++] = j;
+					}
+					j++;
+				}
+				if (num == 1 && AIGold >= heroPrice[type] * 2)
+				{
+					isFind = true;
+					AIGold -= (heroPrice[type] * 2);
+					vecAIHeros[arr[0]]->starsUP();
+				}
+			}
+		}
+	}
+}
+//void HeroLayer::contactProcess(Node* nodeA, Node* nodeB)
+//{
+//	auto tempActor = dynamic_cast<HeroActor*>(nodeA->getParent());
+//	auto tempBullet = dynamic_cast<HeroBullet*>(nodeB->getParent());
+//	tempActor->getDamaged(tempBullet->getBulletDamage());
+//	if (!tempActor->isAlive)
+//	{
+//		if (!tempActor->dieOnce)
+//		{
+//			tempActor->selfDied();
+//			auto pos = tempActor->getHeroPos();
+//			this->removeFromVec(pos, vecAIHeroPos);
+//			numAIHeros--;
+//			auto tlct = tempActor->getTargetBoardPos();
+//			if (board[tlct.first][tlct.second].second != EMPTY)
+//				board[tlct.first][tlct.second].second--;
+//			tempActor->dieOnce = true;
+//		}
+//		std::pair<int, int> lct = tempActor->getBoardPos();
+//		board[lct.first][lct.second].second--;
+//		if (board[lct.first][lct.second].second == EMPTY)
+//		{
+//			tempActor->changeHeroTag(TAG_UNATTACKED);
+//		}
+//		auto attackActor = dynamic_cast<HeroActor*>(tempBullet->getParent());
+//		attackActor->enemyDied();
+//	}
+//	nodeB->removeFromParentAndCleanup(true);
+//}
+
+
+//添加的函数
+void HeroLayer::showResultPerTime(bool ifWin)
+{
+	auto winSize = Director::getInstance()->getWinSize();
+	auto visibleSize = Director::getInstance()->getVisibleSize();
+	if (Player::getInstance()->playerHP >= 0)
+	{
+		if (ifWin)
+		{
+			auto showWin = Sprite::create(WIN_FLAG);
+			showWin->setPosition(visibleSize.width / 2,
+				visibleSize.height / 2+98);
+			this->addChild(showWin);
+			ActionInterval* fadeout = FadeOut::create(5);
+			showWin->runAction(fadeout);
+		}
+		else
+		{
+			auto showWin = Sprite::create(LOSE_FLAG);
+			showWin->setPosition(visibleSize.width / 2,
+				visibleSize.height / 2+98);
+			this->addChild(showWin);
+			ActionInterval* fadeout = FadeOut::create(5);
+			showWin->runAction(fadeout);
+		}
+	}
+}
+void HeroLayer::countDownPrepareTime(float dt)
+{
+	Player::getInstance()->downPrepareTime -= 1.0f/60;
+	labelPrepareTime->setString(StringUtils::format("In Preparation : %d second", 
+		static_cast<int>(Player::getInstance()->downPrepareTime)+1));
+	if (Player::getInstance()->downPrepareTime <= 0)
+	{
+		unschedule(CC_SCHEDULE_SELECTOR(HeroLayer::countDownPrepareTime));
+		removeChild(labelPrepareTime);
+		Player::getInstance()->downPrepareTime = PREPARE_TIME;
+	}
+}
+
+void HeroLayer::eraseLablePrepareTime()
+{
+	unschedule(CC_SCHEDULE_SELECTOR(HeroLayer::countDownPrepareTime));
+	removeChild(labelPrepareTime);
+}
+
+void HeroLayer::addLablePrepareTime()
+{
+	auto visibleSize = Director::getInstance()->getVisibleSize();
+	labelPrepareTime = Label::createWithTTF(StringUtils::format("In Preparation : %d second",
+		static_cast<int>(Player::getInstance()->downPrepareTime) + 1), "fonts/Marker Felt.ttf", 28);
+	labelPrepareTime->setPosition(Vec2(visibleSize.width / 2,
+		visibleSize.height - labelPrepareTime->getContentSize().height));
+	this->addChild(labelPrepareTime);
+	schedule(CC_SCHEDULE_SELECTOR(HeroLayer::countDownPrepareTime), 1.0f/60);
+}
+
+void HeroLayer::countDownBattleTime(float dt)
+{
+	this->downBattleTime -= 1;
+	labelBattleTime->setString(StringUtils::format("In Battle : %d second", downBattleTime));
+	if (downBattleTime < 0|| numAIHeros == 0 || numMyHeros == 0)
+	{
+		unschedule(CC_SCHEDULE_SELECTOR(HeroLayer::countDownBattleTime));
+		removeChild(labelBattleTime);
+		downBattleTime = ROUND_TIME;
+	}
 }

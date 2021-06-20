@@ -13,10 +13,13 @@ public:
     virtual bool init();
 
     void menuReturn(Ref* pSender);
-    void PurchaseScene::update(float dt);
+    void update(float dt);
     CREATE_FUNC(PurchaseScene);
+    void countDownPrepareTime(float dt);
+
 private:
     unsigned int num;
     Label* labelPlayerGold;
+    Label* labelPrepareTime;
 };
 #endif

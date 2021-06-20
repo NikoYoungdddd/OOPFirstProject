@@ -23,6 +23,10 @@ public:
 	virtual void getDamaged(const DAMAGE& bulletDamage);
 
 	virtual void searchEnemy(std::pair<Vec2, int>(&board)[8][8], const bool stay = false) = 0;
+	
+	virtual void moveSearch(std::pair<Vec2, int>(&board)[8][8], const Vec2& endDest, Vec2& stayPos) = 0;
+
+	virtual void lockedSearch(std::pair<Vec2, int>(&board)[8][8],const Vec2& endDest);
 
 	virtual void attack(const bool stay = false) = 0;
 	//技能
@@ -56,13 +60,11 @@ public:
 	virtual void enemyDied();
 
 	virtual Animate* createAnimate(const char* action);
-
 	virtual void doAttack();
-
 	virtual void doStand();
 
 	virtual void resetHero();
-	
+	virtual void starsUP();
 public:
 	unsigned int m_Tag;   //tag
 	int m_Type;  //棋子类型，在子类创建时确定
@@ -80,7 +82,6 @@ protected:
 
 	ProgressTimer* bloodBar;  //血条
 	Vec2 targetPos;   //攻击目标
-	Vec2 targetPos2;  //AOE会射出两个子弹（暂时不实现）
 	Vec2 attackPos;   //在此位置发射子弹
 	float moveDuration;  //移动时间
 	bool isEnemy = false;  //是否为AI创建

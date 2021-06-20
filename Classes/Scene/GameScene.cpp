@@ -1,6 +1,9 @@
 #include "GameScene.h"
-extern int BGM_ID;
-extern bool if_bgm_on;
+
+extern int BGMID;
+extern bool ifBgmOn;
+bool ifFinallyEnd = 0;//用来控制游戏结束时的界面出现，扩展到gamescene
+
 /*图层：（addchild第二个参数）
 * 0.map
 * 1.按钮，音乐按钮的背景
@@ -23,7 +26,6 @@ bool GameScene::init()
     {
         return false;
     }
-    auto winSize = Director::getInstance()->getWinSize();
     auto visibleSize = Director::getInstance()->getVisibleSize();
     Vec2 origin = Director::getInstance()->getVisibleOrigin();
     auto map = TMXTiledMap::create("chessboard3.tmx");
@@ -33,14 +35,19 @@ bool GameScene::init()
     {
         return false;
     }
-    if (if_bgm_on)
+    if (ifBgmOn)
     {
-        BGM_ID = AudioEngine::play2d(BGM_game, true, .5);
+        BGMID = AudioEngine::play2d(BGM_GAME, true, 0.3f);
+    }
+    else
+    {
+        BGMID = AudioEngine::play2d(BGM_GAME, true, .0);
+        
     }
     auto MusicBt = Sprite::create(MUSIC_BUTTON_BACKGROUND);
     if (MusicBt == nullptr)
     {
-        problemLoading("'music_button_bg.png'");
+        problemLoading("'button/musicItemBg.png'");
     }
     else
     {
@@ -54,11 +61,11 @@ bool GameScene::init()
         MUSIC_BUTTON_CONTENT);
     if (musicItem == nullptr)
     {
-        problemLoading("music_button_content.png");
+        problemLoading("'button/musicItemContent.png'");
     }
     else
     {
-        if (!if_bgm_on)
+        if (!ifBgmOn)
             musicItem->setColor(Color3B(20, 20, 20));
         float x = origin.x + visibleSize.width - musicItem->getContentSize().width / 2 * 3;
         float y = origin.y - musicItem->getContentSize().height / 2 + 98 * 10;
@@ -71,7 +78,7 @@ bool GameScene::init()
     UpgradeItem->setScale(UPGRADE_SCALE_IN_GAMESCENE);
     if (UpgradeItem == nullptr)
     {
-        problemLoading("upgradeItem.png");
+        problemLoading("'button/upgradeItem.png'");
     }
     else
     {
@@ -89,7 +96,7 @@ bool GameScene::init()
         closeItem->getContentSize().width <= 0 ||
         closeItem->getContentSize().height <= 0)
     {
-        problemLoading("'closeItem.png' and 'closeItem.png'");
+        problemLoading("'button/closeItem.png'");
     }
     else
     {
@@ -98,15 +105,15 @@ bool GameScene::init()
         closeItem->setPosition(Vec2(x, y));
     }
     auto PurchaseItem = MenuItemImage::create(
-        CHESS_PURCHASE,
-        CHESS_PURCHASE,
+        CHESS_PURCHASE_BUTTON,
+        CHESS_PURCHASE_BUTTON,
         CC_CALLBACK_1(GameScene::menuToPurchaseLayer, this));
 
     if (PurchaseItem == nullptr ||
         PurchaseItem->getContentSize().width <= 0 ||
         PurchaseItem->getContentSize().height <= 0)
     {
-        problemLoading("'ChessSelected.png' and 'ChessSelected.png'");
+        problemLoading("'button / ChessSelected.png'");
     }
     else
     {
@@ -117,17 +124,8 @@ bool GameScene::init()
     auto menu = Menu::create(closeItem, PurchaseItem, NULL);
     menu->setPosition(Vec2::ZERO);
     this->addChild(menu, 1);
-    auto label = Label::createWithTTF(TITLE, "fonts/Marker Felt.ttf", 28);
-    if (label == nullptr)
-    {
-        problemLoading("'fonts/Marker Felt.ttf'");
-    }
-    else
-    {
-        label->setPosition(Vec2(origin.x + visibleSize.width / 2,
-            origin.y + visibleSize.height - label->getContentSize().height));
-        this->addChild(label, 3);
-    }
+    
+
     auto player = Player::getInstance();
     this->addChild(player,3);
     heroLayer = HeroLayer::create();
@@ -143,39 +141,52 @@ bool GameScene::init()
 
 void GameScene::update(float dt)
 {
-	if (Player::getInstance()->heroOnReadyNum > num)
-	{
-		auto heroType = Player::getInstance()->heroOnReady;
+    if (Player::getInstance()->heroOnReadyNum > num)
+        {
+            auto heroType = Player::getInstance()->heroOnReady;
 
-		for (unsigned int i = 0; i < heroType.size() - num; i++)
-		{
-            int type = *(heroType.begin()+num + i);
-            heroLayer->createHeroOnReady(type);
-		}
-		num = Player::getInstance()->heroOnReadyNum;
-	}
-    Player::getInstance()->labelPlayerGold->setString(StringUtils::format("%d", Player::getInstance()->playerGold));
+            for (unsigned int i = 0; i < heroType.size() - num; i++)
+            {
+                int type = *(heroType.begin() + num + i);
+                heroLayer->createHeroOnReady(type);
+            }
+            num = Player::getInstance()->heroOnReadyNum;
+        }
+    if (ifFinallyEnd)
+    {
+        ifFinallyEnd = 0;
+        if (Player::getInstance()->playerHP <= 0||Player::getInstance()->enemyHP <= 0)
+        {
+            scheduleOnce(CC_SCHEDULE_SELECTOR(GameScene::EndToWin), 5.0f);
+        }
+    }
+   
 }
 void GameScene::menuCloseCallback(Ref* pSender)
 {
-    Director::getInstance()->end();
+    Director::getInstance()->pushScene(ExitScene::createScene());
 }
 void GameScene::menuToPurchaseLayer(Ref* pSender)
 {
+    heroLayer->eraseLablePrepareTime();
     Director::getInstance()->pushScene(PurchaseScene::createScene());
 }
 void GameScene::changMusicPlayEvent()
 {
-
-    if (if_bgm_on) {
-        if_bgm_on = false;
+    AudioEngine::setVolume(BGMID, 0.3f);
+    if (ifBgmOn) {
+        ifBgmOn = false;
         this->getChildByTag(77)->setColor(Color3B(20, 20, 20));
-        AudioEngine::pause(BGM_ID);
+        AudioEngine::pause(BGMID);
     }
     else
     {
-        if_bgm_on = true;
+        ifBgmOn = true;
         this->getChildByTag(77)->setColor(Color3B(240, 240, 240));
-        AudioEngine::resume(BGM_ID);
+        AudioEngine::resume(BGMID);
     }
+}
+void GameScene::EndToWin(float dt)
+{
+    Director::getInstance()->replaceScene(EndWin::createScene());
 }

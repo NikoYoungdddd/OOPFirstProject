@@ -2,25 +2,56 @@
 //        HeroAssasion
 Assasion::Assasion()
 {
-	this->m_HP = 2100;
-	this->m_Status.m_Damage.m_PhysicalDamage = 200;
+	this->m_HP = 2000;
+	this->m_Status.m_Damage.m_PhysicalDamage = 150;
 	this->m_Status.m_Damage.m_PowerDamage = 50;
-	this->m_Status.m_Defense.m_PhysicalDefense = 70;
-	this->m_Status.m_Defense.m_PowerDefense = 50;
-	this->m_Status.m_AttackFrequency = 5;
+	this->m_Status.m_Defense.m_PhysicalDefense = 50;
+	this->m_Status.m_Defense.m_PowerDefense = 30;
+	this->m_Status.m_AttackFrequency = 50;
 	this->m_Cost = 1;
+	this->m_Star = 1;
 	this->m_Type = Type_Assasion;
 	boardX = -1;
 	boardY = -1;
 }
 
-
+void Assasion::moveSearch(std::pair<Vec2, int>(&board)[8][8], const Vec2& endDest, Vec2& stayPos)
+{
+	int flag = 1;
+	board[boardX][boardY].second = EMPTY;
+	for (int i = 0; i < 8 && flag; i++)
+	{
+		for (int j = 0; j < 8 && flag; j++)
+		{
+			if (board[i][j].first == endDest)
+			{
+				targetBoardPosX = i;
+				targetBoardPosY = j;
+				if (board[i][j].second == OCCUPIED)
+					board[i][j].second = EMPTY;
+				board[i][j].second++;
+				for (int k = 0; k < 5; k++)
+				{
+					int x = AssasionSearch[k][0], y = AssasionSearch[k][1];
+					if (i + x < 0 || i + x >= 8 || i + y < 0 || i + y >= 8)
+						continue;
+					if (!board[i + x][j + y].second)
+					{
+						stayPos = board[i + x][j + y].first;
+						board[i + x][j + y].second = OCCUPIED;
+						boardX = i + x;
+						boardY = j + y;
+						flag = 0;
+						break;
+					}
+				}
+			}
+		}
+	}
+}
 
 void Assasion::searchEnemy(std::pair<Vec2, int>(&board)[8][8], const bool stay)
 {
-	auto winSize = Director::getInstance()->getWinSize();
-	Vec2 origin = Director::getInstance()->getVisibleOrigin();
-
 	Vec2 startDest = myHero->getPosition();
 	Vec2 endDest = *(vecPos.begin());
 	Vec2 stayPos = startDest;
@@ -53,59 +84,13 @@ void Assasion::searchEnemy(std::pair<Vec2, int>(&board)[8][8], const bool stay)
 
 	if (!stay)
 	{
-		int flag = 1;
-		board[boardX][boardY].second = EMPTY;
 
-		for (int i = 0; i < 8 && flag; i++)
-		{
-			for (int j = 0; j < 8 && flag; j++)
-			{
-				if (board[i][j].first == endDest)
-				{
-					targetBoardPosX = i;
-					targetBoardPosY = j;
-					if (board[i][j].second == OCCUPIED)
-						board[i][j].second = EMPTY;
-					board[i][j].second ++;
-					for (int k = 0; k < 5; k++)
-					{
-						int x = AssasionSearch[k][0], y = AssasionSearch[k][1];
-						if (i + x < 0 || i + x >= 8 || i + y < 0 || i + y >= 8)
-							continue;
-						if (!board[i + x][j + y].second)
-						{
-							stayPos = board[i + x][j + y].first;
-							board[i + x][j + y].second = OCCUPIED;
-							boardX = i + x;
-							boardY = j + y;
-							flag = 0;
-							break;
-						}
-					}
-				}
-			}
-		}
-	
+		moveSearch(board,endDest,stayPos);
 	}
 
 	else
 	{
-		int flag = 1;
-		for (int i = 0; i < 8 && flag; i++)
-		{
-			for (int j = 0; j < 8 && flag; j++)
-			{
-				if (board[i][j].first == endDest)
-				{
-					targetBoardPosX = i;
-					targetBoardPosY = j;
-					if (board[i][j].second == OCCUPIED)
-						board[i][j].second = EMPTY;
-					board[i][j].second++;
-					flag = 0;
-				}
-			}
-		}
+		lockedSearch(board, endDest);
 	}
 	targetPos = endDest;
 	attackPos = stayPos;
@@ -116,8 +101,15 @@ void Assasion::attack(const bool stay)
 {
 	float ff = ATTACK_DURATION_MARK / m_Status.m_AttackFrequency;
 
+
+	float distance = sqrt((attackPos.x - targetPos.x) * (attackPos.x - targetPos.x)
+		+ (attackPos.y - targetPos.y) * (attackPos.y - targetPos.y));
+	int dampdeRate = 1;
+	if (distance > maxDistance[m_Type])
+		dampdeRate++;
+
 	auto shoot = CallFunc::create([=]() {
-		auto attackBullet = HeroBullet::create(heroBulletName[m_Type], this->m_Status.m_Damage);
+		auto attackBullet = HeroBullet::create(heroBulletName[m_Type], this->m_Status.m_Damage/ dampdeRate);
 		attackBullet->setBulletPos(myHero->getPosition());
 		attackBullet->setBulletScale(heroBulletScale[m_Type]);
 		attackBullet->bulletBuild(isEnemy);
@@ -129,7 +121,7 @@ void Assasion::attack(const bool stay)
 		attackBullet->shootBullet(Sequence::create(pointMove, pointMoveDone, nullptr));
 		});
 	auto delay_t = DelayTime::create(ff);
-	auto shootArray = Repeat::create(Sequence::create(delay_t, shoot, nullptr), 20);	
+	auto shootArray = Repeat::create(Sequence::create(delay_t, shoot, nullptr), 50);	
 	//auto shootArray = RepeatForever::create(Sequence::create(delay_t, shoot, nullptr));
 
 	if (targetPos.x - attackPos.x > 0.00001f)

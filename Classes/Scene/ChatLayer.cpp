@@ -32,8 +32,7 @@ bool ChatLayer::init()
     {
         return true;
     } 
-    auto visibleSize = Director::getInstance()->getVisibleSize();//这句张宇没有?
-    auto winSize = Director::getInstance()->getWinSize();//changed by zhangyu
+    auto visibleSize = Director::getInstance()->getVisibleSize();
     Vec2 origin = Director::getInstance()->getVisibleOrigin();
 
     auto chatFrame = Sprite::create(CHAT_WINDOW);
@@ -43,7 +42,7 @@ bool ChatLayer::init()
     auto sendItem = ui::Button::create(SEND_BUTTON, SEND_BUTTON);
     if (sendItem == nullptr)
     {
-        problemLoading("upgradeItem.png");
+        problemLoading("button/chatSendItem.png");
     }
     else
     {

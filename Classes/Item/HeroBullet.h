@@ -16,7 +16,7 @@ public:
 	void setBulletPos(const Vec2& pos);
 	Vec2 getBulletPos() const;
 	void setBulletScale(const float s);
-	void bulletBuild(bool isEnemy);
+	void bulletBuild(bool isEnemy,bool second=false);
 	void shootBullet(cocos2d::Action* acton);
 	void setBulletRotation(const Vec2& targetPos);
 

@@ -21,6 +21,5 @@ private:
 	Sprite* equipment = nullptr;
 	bool alreadyCreateEquipment = false;
 	std::string equipmentName;
-	
 };
 #endif

@@ -51,9 +51,12 @@ void HeroBullet::setBulletScale(float s)
 	m_Bullet->setScale(s);
 }
 
-void HeroBullet::bulletBuild(bool isEnemy)
+void HeroBullet::bulletBuild(bool isEnemy,bool isSecond)
 {
-	m_Bullet->setTag(isEnemy ? TAG_AI_BULLET : TAG_MY_BULLET);
+	if (isSecond)
+		m_Bullet->setTag(isEnemy ? TAG_AI_SECOND_BULLET : TAG_MY_SECOND_BULLET);
+	else
+		m_Bullet->setTag(isEnemy ? TAG_AI_BULLET : TAG_MY_BULLET);
 	auto bulletSize = m_Bullet->getContentSize();
 	auto bulletPhysic = PhysicsBody::createEdgeBox(Size(bulletSize.width * 0.08f, bulletSize.height * 0.01f));
 	bulletPhysic->setDynamic(false);

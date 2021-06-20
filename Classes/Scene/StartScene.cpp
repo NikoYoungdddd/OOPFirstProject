@@ -1,7 +1,8 @@
 #include "StartScene.h"
 
-int BGM_ID;
-bool if_bgm_on;
+int BGMID;
+bool ifBgmOn;
+
 static void problemLoading(const char* filename)
 {
     printf("Error while loading: %s\n", filename);
@@ -18,9 +19,8 @@ bool StartScene::init()
         return false;
     }
    
-    BGM_ID=AudioEngine::play2d(BGM, true, .5);
-    //AudioEngine::preload(BGM_pressed);
-    if_bgm_on = true;
+    BGMID =AudioEngine::play2d(BGM_START, true, .5);
+    ifBgmOn = true;
 
     auto visibleSize = Director::getInstance()->getVisibleSize();
     Vec2 origin = Director::getInstance()->getVisibleOrigin();
@@ -33,7 +33,7 @@ bool StartScene::init()
         closeItem->getContentSize().width <= 0 ||
         closeItem->getContentSize().height <= 0)
     {
-        problemLoading("'closeItem.png' and 'closeItem.png'");
+        problemLoading("'button/closeItem.png'");
     }
     else
     {
@@ -49,7 +49,7 @@ bool StartScene::init()
         startItem->getContentSize().width <= 0 ||
         startItem->getContentSize().height <= 0)
     {
-        problemLoading("'startItem.png' and 'startItem.png'");
+        problemLoading("'button/startItem.png'");
     }
     else
     {
@@ -65,7 +65,7 @@ bool StartScene::init()
     auto BackGround = Sprite::create(START_BACKGROUND);
     if (MusicBt == nullptr|| BackGround == nullptr)
     {
-        problemLoading("'music_button_bg.png'and'startBg.png'");
+        problemLoading("'button/musicItemBg.png'and'background/startBg.png'");
     }
     else
     {
@@ -74,18 +74,18 @@ bool StartScene::init()
         float x = origin.x + visibleSize.width - MusicBt->getContentSize().width / 2*3;
         float y = origin.y - MusicBt->getContentSize().height / 2 + 98 * 10;
         MusicBt->setPosition(Vec2(x, y));
-        this->addChild(MusicBt, 0);
+        this->addChild(MusicBt, 1);
         //在这里为了避免对于空指针closeItem的引用，将图片素材的音乐按钮背景与关闭图标设置为统一大小
     }
     auto musicItem = ui::Button::create(MUSIC_BUTTON_CONTENT,
         MUSIC_BUTTON_CONTENT);
     if (musicItem == nullptr)
     {
-        problemLoading("music_button_content.png");
+        problemLoading("'button/musicItemContent.png'");
     }
     else
     {
-        if (!if_bgm_on)
+        if (!ifBgmOn)
             musicItem->setColor(Color3B(20, 20, 20));
         float x = origin.x + visibleSize.width - musicItem->getContentSize().width / 2*3;
         float y = origin.y - musicItem->getContentSize().height / 2+98*10;
@@ -98,28 +98,24 @@ bool StartScene::init()
 }
 void StartScene::CloseCallback(Ref* pSender)
 {
-    Director::getInstance()->end();
+    Director::getInstance()->pushScene(ExitScene::createScene());
 }
 void StartScene::StartCallback(Ref* pSender)
 {
-    AudioEngine::pause(BGM_ID);
-    //if (if_bgm_on==1)
-    //{
-    //    BGM_ID = AudioEngine::play2d(BGM_game, true, 0.5f);
-    //}
-    Director::getInstance()->replaceScene(TransitionMoveInB::create(1.0f, GameScene::createScene()));
+    AudioEngine::pause(BGMID);
+    Director::getInstance()->replaceScene(TransitionMoveInB::create(1.0f, ChooseScene::createScene()));
 }
 void StartScene::changMusicPlayEvent() {
 
-    if (if_bgm_on) {
-        if_bgm_on = false;
+    if (ifBgmOn) {
+        ifBgmOn = false;
         this->getChildByTag(77)->setColor(Color3B(20, 20, 20));
-        AudioEngine::pause(BGM_ID);
+        AudioEngine::pause(BGMID);
     }
     else
     {
-        if_bgm_on = true;
+        ifBgmOn = true;
         this->getChildByTag(77)->setColor(Color3B(240, 240, 240));
-        AudioEngine::resume(BGM_ID);
+        AudioEngine::resume(BGMID);
     }
 }

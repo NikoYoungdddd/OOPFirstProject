@@ -42,13 +42,13 @@ bool Equipment::onTouchBegan(cocos2d::Touch* touch, cocos2d::Event* unused_event
 	if (equipment != nullptr)
 	{
 		auto equipmentPosition = equipment->getPosition();
-		auto equipmentSize = equipment->getContentSize() * EQUIPMENT_SCALE * 0.5f;
+		auto equipmentSize = equipment->getContentSize() * EQUIPMENT_SCALE;
 		if (touchLocation.x > equipmentPosition.x - equipmentSize.width / 2 &&
 			touchLocation.x <equipmentPosition.x + equipmentSize.width / 2 &&
 			touchLocation.y > equipmentPosition.y - equipmentSize.height / 2 &&
 			touchLocation.y < equipmentPosition.y + equipmentSize.height / 2)
 		{
-			removeChild(equipment);
+			this->removeChild(equipment);
 			equipment = nullptr;
 			isMoved = true;
 		}

@@ -24,6 +24,13 @@ typedef struct sDamage
 		return *this;
 	}
 
+	sDamage operator/(const int i)
+	{
+		sDamage temp = *this;
+		temp.m_PhysicalDamage = this->m_PhysicalDamage / i;
+		temp.m_PowerDamage = this->m_PowerDamage / i;
+		return temp;
+	}
 
 }DAMAGE;
 
@@ -101,6 +108,25 @@ typedef struct sStatus
 		this->m_Damage.m_PhysicalDamage = physicdamage;
 		this->m_Damage.m_PowerDamage = powerdamage;
 		this->m_AttackFrequency = frequency;
+	}
+
+	sStatus& operator*=(float ft)
+	{
+
+		this->m_Defense.m_PhysicalDefense =
+			static_cast<unsigned int>(m_Defense.m_PhysicalDefense * ft);
+		this->m_Defense.m_PhysicalDefense =
+			static_cast<unsigned int> (m_Defense.m_PhysicalDefense * ft);
+		this->m_Defense.m_PowerDefense =
+			static_cast<unsigned int> (m_Defense.m_PowerDefense * ft);
+		this->m_Damage.m_PhysicalDamage =
+			static_cast<unsigned int> (m_Damage.m_PhysicalDamage * ft);
+		this->m_Damage.m_PowerDamage =
+			static_cast<unsigned int> (m_Damage.m_PowerDamage * ft);
+		this->m_AttackFrequency =
+			static_cast<unsigned int>(m_AttackFrequency * ft);
+
+		return (*this);
 	}
 
 } STATUS;

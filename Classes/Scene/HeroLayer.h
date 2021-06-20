@@ -8,7 +8,7 @@
 #include "Actor/AP.h"
 #include "HeroPurchase.h"
 #include "Item/Equipment.h"
-
+#include "AudioEngine.h"
 
 #define AI_SIDE 0
 #define MY_SIDE 1
@@ -67,6 +67,26 @@ public:
 	void updateHeros();
 
 	void createEquipment(const Vec2& pos);
+
+	void AIHeroStarsUP();
+	void AIHeroCreateStarsUP();
+	void createAIHeros(float dt);
+	void contactProcess(Node* nodeA, Node* nodeB);
+
+	//目前支持
+	//3-4个在准备位置
+	//1个在棋盘，2个准备
+	//2个在棋盘，1个在准备
+	void heroStarsUP();
+
+
+	//我能加上的
+	void showResultPerTime(bool ifWin);
+	void countDownBattleTime(float dt);
+	void countDownPrepareTime(float dt);
+	void eraseLablePrepareTime();
+	void HeroLayer::addLablePrepareTime();
+
 public:
 	std::pair<Vec2, int> board[8][8];
 	std::pair<Vec2, int> readyPos[8];
@@ -77,9 +97,25 @@ public:
 	std::vector<HeroActor*>vecHeroOnReady;
 	//std::vector<HeroActor*>vecHeroOnBoard;
 
+	int arrayHeroNum[5]={};
+	int arrayAIHeroNum[5] = {};
+	
+
 	bool isStartNewRound = false;
 	bool isGameStart = false;
 	
+	int AIGold = 4;
+	int AIExp = 0;
+	int AIGrade = 1;
+
+	//我添加的
+	//int downPrepareTime = PREPARE_TIME;
+	Label* labelPrepareTime;
+	Label* labelBattleTime;
+	int downBattleTime = ROUND_TIME;
+	int buffNum = 0;
+	EventListenerTouchOneByOne* touchListener;
+	int bgmBattle;
 private:
 	std::vector<Vec2> vecAIHeroPos;  //敌方位置
 	std::vector<Vec2> vecMyHeroPos;  //我方位置

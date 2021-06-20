@@ -3,8 +3,9 @@
 
 #include "Const/Const.h"
 #include "AudioEngine.h"
-#include "GameScene.h"
+#include "ChooseScene.h"
 #include "ui/CocosGUI.h"
+#include "ExitScene.h"
 
 class StartScene : public cocos2d::Scene
 {

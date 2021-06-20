@@ -8,6 +8,8 @@
 #include "ui/CocosGUI.h"
 #include "Player.h"
 #include "ChatLayer.h"
+#include "ExitScene.h"
+#include "EndWin.h"
 class GameScene : public cocos2d::Scene
 {
 public:
@@ -20,6 +22,7 @@ public:
     void menuToPurchaseLayer(Ref* pSender);
     void update(float dt);
     void changMusicPlayEvent();
+    void EndToWin(float dt);
 public:
     unsigned int num;
     HeroLayer* heroLayer;
