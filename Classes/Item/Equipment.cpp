@@ -3,6 +3,7 @@
 Equipment::Equipment(const Vec2& pos)
 {
 	alreadyCreateEquipment = false;
+	
 	srand((unsigned)(time(nullptr)));
 	if (alreadyCreateEquipment == false)
 	{
@@ -22,18 +23,20 @@ Equipment::~Equipment()
 
 }
 
+
 bool Equipment::init()
 {
 	if (!Node::init())
 	{
 		return true;
 	}
-	
+
 	auto touchListener = EventListenerTouchOneByOne::create();
 	touchListener->onTouchBegan = CC_CALLBACK_2(Equipment::onTouchBegan, this);
 	_eventDispatcher->addEventListenerWithSceneGraphPriority(touchListener, this);
 	return true;
 }
+
 
 bool Equipment::onTouchBegan(cocos2d::Touch* touch, cocos2d::Event* unused_event)
 {
@@ -56,6 +59,7 @@ bool Equipment::onTouchBegan(cocos2d::Touch* touch, cocos2d::Event* unused_event
 	return true;
 }
 
+
 Equipment* Equipment::create(const Vec2& pos)
 {
 	auto pRet = new Equipment(pos);
@@ -75,6 +79,8 @@ Equipment* Equipment::create(const Vec2& pos)
 	}
 
 }
+
+
 std::string Equipment::getEquipment()const
 {
 	return equipmentName;

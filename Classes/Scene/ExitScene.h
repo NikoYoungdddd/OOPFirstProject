@@ -3,15 +3,21 @@
 
 #include "Const/Const.h"
 
-class ExitScene : public cocos2d::Scene
+/*退出界面*/
+class ExitScene : public Scene
 {
+
 public:
-    static cocos2d::Scene* createScene();
+    static Scene* createScene();
 
     virtual bool init();
-
+   
+    //误点退出回到游戏 
     void menuReturn(Ref* pSender);
+   
+    //确定退出 
     void menuExit(Ref* pSender);
+   
     CREATE_FUNC(ExitScene);
 };
 #endif

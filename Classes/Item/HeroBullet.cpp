@@ -6,6 +6,8 @@ HeroBullet::HeroBullet(const std::string& bulletName, const DAMAGE& bulletDamage
 	m_Bullet = Sprite::create(bulletName);
 	this->addChild(m_Bullet);
 }
+
+
 bool HeroBullet::init()
 {
 	if (!Node::init())
@@ -15,6 +17,7 @@ bool HeroBullet::init()
 
 	return true;
 }
+
 
 HeroBullet* HeroBullet::create(const std::string& bulletName, const DAMAGE& bulletDamage)
 {
@@ -34,24 +37,9 @@ HeroBullet* HeroBullet::create(const std::string& bulletName, const DAMAGE& bull
 		return nullptr;
 	}
 }
-DAMAGE HeroBullet::getBulletDamage()const
-{
-	return this->m_Damage;
-}
-void HeroBullet::setBulletPos(const Vec2& pos)
-{
-	m_Bullet->setPosition(pos);
-}
-Vec2 HeroBullet::getBulletPos() const
-{
-	return m_Bullet->getPosition();
-}
-void HeroBullet::setBulletScale(float s)
-{
-	m_Bullet->setScale(s);
-}
 
-void HeroBullet::bulletBuild(bool isEnemy,bool isSecond)
+
+void HeroBullet::bulletBuild(bool isEnemy, bool isSecond)
 {
 	if (isSecond)
 		m_Bullet->setTag(isEnemy ? TAG_AI_SECOND_BULLET : TAG_MY_SECOND_BULLET);
@@ -65,9 +53,16 @@ void HeroBullet::bulletBuild(bool isEnemy,bool isSecond)
 	m_Bullet->setPhysicsBody(bulletPhysic);
 }
 
-void HeroBullet::shootBullet(cocos2d::Action* acton)
+
+void HeroBullet::setBulletPos(const Vec2& pos)
 {
-	m_Bullet->runAction(acton);
+	m_Bullet->setPosition(pos);
+}
+
+
+void HeroBullet::setBulletScale(float s)
+{
+	m_Bullet->setScale(s);
 }
 
 
@@ -98,3 +93,16 @@ void HeroBullet::setBulletRotation(const Vec2& targetPos)
 	}
 	m_Bullet->setRotation(angle);
 }
+
+
+DAMAGE HeroBullet::getBulletDamage()const
+{
+	return this->m_Damage;
+}
+
+
+void HeroBullet::shootBullet(cocos2d::Action* acton)
+{
+	m_Bullet->runAction(acton);
+}
+

@@ -1,26 +1,29 @@
-#include "EndWin.h"
+#include "EndScene.h"
+
 static void problemLoading(const char* filename)
 {
     printf("Error while loading: %s\n", filename);
     printf("Depending on how you compiled you might have to add 'Resources/' in front of filenames in StartGameScene.cpp\n");
 }
 
-Scene* EndWin::createScene()
+
+Scene* EndScene::createScene()
 {
-    return EndWin::create();
+    return EndScene::create();
 }
 
-bool EndWin::init()
+
+bool EndScene::init()
 {
     if (!Scene::init())
     {
         return false;
     }
     auto visibleSize = Director::getInstance()->getVisibleSize();
-    auto unclearBg = Sprite::create(UNCLEAR_BACKGROUND);
+    auto unclearBg = Sprite::create(UNCLEAR_MAP);
     if (unclearBg == nullptr)
     {
-        problemLoading("'background/unclearstartBg.png'");
+        problemLoading("'background/unclearMap.png'");
     }
     else
     {
@@ -71,7 +74,7 @@ bool EndWin::init()
     auto ExitItem = MenuItemImage::create(
         ENDGAME_BUTTON,
         ENDGAME_BUTTON,
-        CC_CALLBACK_1(EndWin::menuExit, this));
+        CC_CALLBACK_1(EndScene::menuExit, this));
     if (ExitItem == nullptr ||
         ExitItem->getContentSize().width <= 0 ||
         ExitItem->getContentSize().height <= 0)
@@ -81,18 +84,20 @@ bool EndWin::init()
     else
     {
         float x = visibleSize.width / 2;
-        float y = visibleSize.height / 3 + 49;
+        float y = visibleSize.height / 3;
         ExitItem->setPosition(Vec2(x, y));
     }
     auto menu = Menu::create(ExitItem, NULL);
     menu->setPosition(Vec2::ZERO);
     this->addChild(menu, 1);
-
+    auto finalResult = Label::createWithTTF(StringUtils::format("Your final level : %d", Player::getInstance()->playerGrade), "fonts/Marker Felt.ttf", 40);
+    finalResult->setPosition(Vec2(visibleSize.width / 2, visibleSize.height / 2 - 98));
+    this->addChild(finalResult);
     return true;
 }
 
 
-void EndWin::menuExit(Ref* pSender)
+void EndScene::menuExit(Ref* pSender)
 {
     Director::getInstance()->end();
 }

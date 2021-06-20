@@ -3,6 +3,9 @@
 extern int BGMID;
 extern bool ifBgmOn;
 bool ifFinallyEnd = 0;//用来控制游戏结束时的界面出现，扩展到gamescene
+extern bool ifIsBattling;
+bool ifClickLocked = 0;
+
 
 /*图层：（addchild第二个参数）
 * 0.map
@@ -15,11 +18,13 @@ Scene* GameScene::createScene()
 {
     return GameScene::create();
 }
+
 static void problemLoading(const char* filename)
 {
     printf("Error while loading: %s\n", filename);
     printf("Depending on how you compiled you might have to add 'Resources/' in front of filenames in HelloWorldScene.cpp\n");
 }
+
 bool GameScene::init()
 {
     if (!Scene::init())
@@ -29,7 +34,7 @@ bool GameScene::init()
     auto visibleSize = Director::getInstance()->getVisibleSize();
     Vec2 origin = Director::getInstance()->getVisibleOrigin();
     auto map = TMXTiledMap::create("chessboard3.tmx");
-    this->addChild(map,0);
+    this->addChild(map, 0);
 
     if (!Scene::initWithPhysics())
     {
@@ -42,7 +47,7 @@ bool GameScene::init()
     else
     {
         BGMID = AudioEngine::play2d(BGM_GAME, true, .0);
-        
+
     }
     auto MusicBt = Sprite::create(MUSIC_BUTTON_BACKGROUND);
     if (MusicBt == nullptr)
@@ -82,8 +87,8 @@ bool GameScene::init()
     }
     else
     {
-        UpgradeItem->setPosition(Vec2(UpgradeItem->getContentSize().width/2, 
-            98*10- UpgradeItem->getContentSize().height / 2));
+        UpgradeItem->setPosition(Vec2(UpgradeItem->getContentSize().width / 2,
+            98 * 10 - UpgradeItem->getContentSize().height / 2));
         UpgradeItem->addClickEventListener([&](Ref*) { Player::getInstance()->playerUpgrade(); });
         this->addChild(UpgradeItem, 1);
     }
@@ -121,56 +126,121 @@ bool GameScene::init()
         float y = origin.y + PurchaseItem->getContentSize().height / 2;
         PurchaseItem->setPosition(Vec2(x, y));
     }
-    auto menu = Menu::create(closeItem, PurchaseItem, NULL);
+   
+    auto menu = Menu::create(closeItem, nullptr);
     menu->setPosition(Vec2::ZERO);
     this->addChild(menu, 1);
-    
+    menuUnable = Menu::create(PurchaseItem,nullptr);
+    menuUnable->setPosition(Vec2::ZERO);
+    this->addChild(menuUnable, 1);
 
     auto player = Player::getInstance();
-    this->addChild(player,3);
+    this->addChild(player, 3);
     heroLayer = HeroLayer::create();
-    this->addChild(heroLayer,4);
-    auto chatLayer = ChatLayer::create();
-    this->addChild(chatLayer, 3);
+    this->addChild(heroLayer, 4);
+
+    if (!Player::getInstance()->isAI)
+    {
+        auto chatLayer = ChatLayer::create();
+        this->addChild(chatLayer, 3);
+    }
     this->scheduleUpdate();
+    if (!Player::getInstance()->isAI)
+    {
+        if (Player::getInstance()->server == SERVER)
+        {
+            log("start server");
+            if (Server::getInstance()->OpenTCPServer(1))
+            {
+                log("start success");
+
+                if (Server::getInstance()->AcceptClient())
+                {
+                    log("accept!");
+                    {
+                        ;
+                    }
+                }
+            }
+            else
+                log("error");
+        }
+        else if (Player::getInstance()->server == CLIENT)
+        {
+            log("start");
+            /*初始化客户端*/
+            if (Client::getInstance()->InitSocket(1))  //初始化套接字
+            {
+                log("init success");
+                /*连接服务端*/
+                if (Client::getInstance()->ConnectServer())     //连接服务器
+                {
+                    log("connect success");
+
+                }
+                else
+                    log("connect erro");
+            }
+            //联网结束
+        }
+    }
+    std::thread t1(&GameScene::ThreadRecv, this);
+    t1.detach();
     return true;
 }
-
-
 
 
 void GameScene::update(float dt)
 {
     if (Player::getInstance()->heroOnReadyNum > num)
-        {
-            auto heroType = Player::getInstance()->heroOnReady;
+    {
+        auto heroType = Player::getInstance()->heroOnReady;
 
-            for (unsigned int i = 0; i < heroType.size() - num; i++)
-            {
-                int type = *(heroType.begin() + num + i);
-                heroLayer->createHeroOnReady(type);
-            }
-            num = Player::getInstance()->heroOnReadyNum;
+        for (unsigned int i = 0; i < heroType.size() - num; i++)
+        {
+            int type = *(heroType.begin() + num + i);
+            heroLayer->createHeroOnReady(type);
         }
+        num = Player::getInstance()->heroOnReadyNum;
+    }
     if (ifFinallyEnd)
     {
         ifFinallyEnd = 0;
-        if (Player::getInstance()->playerHP <= 0||Player::getInstance()->enemyHP <= 0)
+        if (Player::getInstance()->playerHP <= 0 || Player::getInstance()->enemyHP <= 0)
         {
             scheduleOnce(CC_SCHEDULE_SELECTOR(GameScene::EndToWin), 5.0f);
         }
     }
-   
+    if (ifIsBattling == 1 && ifClickLocked == 0)
+    {
+        ifClickLocked = 1;
+        menuUnable->setEnabled(false);
+    }
+    if (ifIsBattling == 0 && ifClickLocked == 1)
+    {
+        ifClickLocked = 0;
+        menuUnable->setEnabled(true);
+    }
+
+
+  //  ThreadRecv();
+
 }
+
+
 void GameScene::menuCloseCallback(Ref* pSender)
 {
     Director::getInstance()->pushScene(ExitScene::createScene());
 }
+
+
 void GameScene::menuToPurchaseLayer(Ref* pSender)
 {
     heroLayer->eraseLablePrepareTime();
     Director::getInstance()->pushScene(PurchaseScene::createScene());
 }
+
+
 void GameScene::changMusicPlayEvent()
 {
     AudioEngine::setVolume(BGMID, 0.3f);
@@ -186,7 +256,27 @@ void GameScene::changMusicPlayEvent()
         AudioEngine::resume(BGMID);
     }
 }
+
+
 void GameScene::EndToWin(float dt)
 {
-    Director::getInstance()->replaceScene(EndWin::createScene());
+    Director::getInstance()->replaceScene(EndScene::createScene());
+}
+
+
+void GameScene::ThreadRecv()
+{
+    while (1)
+    {
+        Sleep(100);
+        int i = 0;
+        if (Player::getInstance()->server == SERVER)
+            i = Server::getInstance()->RecvDataAndJudge();
+        if (Player::getInstance()->server == CLIENT)
+            i = Client::getInstance()->RecvDataAndJudge();
+        if (i != 0)
+        {
+            //log(iRet.data());
+        }
+    }
 }

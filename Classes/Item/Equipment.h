@@ -7,15 +7,21 @@ class Equipment : public Node
 {
 public:
 	Equipment(const Vec2& pos);
+
 	~Equipment();
+
 	virtual bool init();
+
 	static Equipment* create(const Vec2& pos);
 
+	//»ñµÃÎäÆ÷Ãû
 	std::string getEquipment()const;
 
 	bool onTouchBegan(cocos2d::Touch* touch, cocos2d::Event* unused_event);
-
+	
+public:
 	bool isMoved = false;
+
 private:
 
 	Sprite* equipment = nullptr;

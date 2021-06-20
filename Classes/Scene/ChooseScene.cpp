@@ -1,14 +1,17 @@
 #include "ChooseScene.h"
+
 static void problemLoading(const char* filename)
 {
     printf("Error while loading: %s\n", filename);
     printf("Depending on how you compiled you might have to add 'Resources/' in front of filenames in StartGameScene.cpp\n");
 }
 
+
 Scene* ChooseScene::createScene()
 {
     return ChooseScene::create();
 }
+
 
 bool ChooseScene::init()
 {
@@ -73,22 +76,58 @@ bool ChooseScene::init()
     menu->setPosition(Vec2::ZERO);
     this->addChild(menu, 1);
 
+
+    auto editbox1 = ui::EditBox::create(Size(300, 50), ui::Scale9Sprite::create(CHAT_FR));
+    editbox1->setAnchorPoint(Point(0, 0));
+    editbox1->setPosition(Vec2(visibleSize.width / 2 - 150, visibleSize.height / 2 + 60));
+    editbox1->setPlaceHolder("Server ip:");//占位字符
+    editbox1->setMaxLength(20);
+    editbox1->setFontColor(Color3B::BLACK);//设置输入字体的颜色
+    editbox1->setTag(1);
+
+    auto editbox2 = ui::EditBox::create(Size(300, 50), ui::Scale9Sprite::create(CHAT_FR));
+    editbox2->setAnchorPoint(Point(0, 0));
+    editbox2->setPosition(Vec2(visibleSize.width / 2 - 150, visibleSize.height / 4 + 60));
+    editbox2->setPlaceHolder("Client ip:");//占位字符
+    editbox2->setMaxLength(20);
+    editbox2->setFontColor(Color3B::BLACK);//设置输入字体的颜色
+    editbox2->setTag(2);
+
+    this->addChild(editbox1, 1);
+    this->addChild(editbox2, 1);
+
+
     return true;
 }
+
+
 void ChooseScene::menuAI(Ref* pSender)
 {
     Player::getInstance()->isAI = 1;
-    Director::getInstance()->replaceScene(GameScene::createScene());
+    Director::getInstance()->replaceScene(TransitionFade::create(0.5f, GameScene::createScene()));
 }
+
+
 void ChooseScene::menuServer(Ref* pSender)
 {
     Player::getInstance()->isAI = 0;
-    Player::getInstance()->server = isServer;
-    Director::getInstance()->replaceScene(GameScene::createScene());
+    Player::getInstance()->server = SERVER;
+
+    auto editbox3 = (ui::EditBox*)this->getChildByTag(1);
+	Server::getInstance()->myIP = editbox3->getText();
+	log(editbox3->getText());
+	Director::getInstance()->replaceScene(TransitionFade::create(0.5f, GameScene::createScene()));
 }
+
+
 void ChooseScene::menuClient(Ref* pSender)
 {
-    Player::getInstance()->isAI = 0;
-    Player::getInstance()->server = isClient;
-    Director::getInstance()->replaceScene(GameScene::createScene());
+	Player::getInstance()->isAI = 0;
+	Player::getInstance()->server = CLIENT;
+
+	auto editbox4 = (ui::EditBox*)this->getChildByTag(2);
+	Client::getInstance()->myIP = editbox4->getText();
+
+	log(editbox4->getText());
+	Director::getInstance()->replaceScene(TransitionFade::create(0.5f, GameScene::createScene()));
 }

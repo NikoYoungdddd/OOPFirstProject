@@ -11,9 +11,11 @@ Assasion::Assasion()
 	this->m_Cost = 1;
 	this->m_Star = 1;
 	this->m_Type = Type_Assasion;
+
 	boardX = -1;
 	boardY = -1;
 }
+
 
 void Assasion::moveSearch(std::pair<Vec2, int>(&board)[8][8], const Vec2& endDest, Vec2& stayPos)
 {
@@ -50,6 +52,7 @@ void Assasion::moveSearch(std::pair<Vec2, int>(&board)[8][8], const Vec2& endDes
 	}
 }
 
+
 void Assasion::searchEnemy(std::pair<Vec2, int>(&board)[8][8], const bool stay)
 {
 	Vec2 startDest = myHero->getPosition();
@@ -85,7 +88,7 @@ void Assasion::searchEnemy(std::pair<Vec2, int>(&board)[8][8], const bool stay)
 	if (!stay)
 	{
 
-		moveSearch(board,endDest,stayPos);
+		moveSearch(board, endDest, stayPos);
 	}
 
 	else
@@ -96,6 +99,7 @@ void Assasion::searchEnemy(std::pair<Vec2, int>(&board)[8][8], const bool stay)
 	attackPos = stayPos;
 	moveDuration = longestLen / SPEED;
 }
+
 
 void Assasion::attack(const bool stay)
 {
@@ -109,7 +113,7 @@ void Assasion::attack(const bool stay)
 		dampdeRate++;
 
 	auto shoot = CallFunc::create([=]() {
-		auto attackBullet = HeroBullet::create(heroBulletName[m_Type], this->m_Status.m_Damage/ dampdeRate);
+		auto attackBullet = HeroBullet::create(heroBulletName[m_Type], this->m_Status.m_Damage / dampdeRate);
 		attackBullet->setBulletPos(myHero->getPosition());
 		attackBullet->setBulletScale(heroBulletScale[m_Type]);
 		attackBullet->bulletBuild(isEnemy);
@@ -121,7 +125,7 @@ void Assasion::attack(const bool stay)
 		attackBullet->shootBullet(Sequence::create(pointMove, pointMoveDone, nullptr));
 		});
 	auto delay_t = DelayTime::create(ff);
-	auto shootArray = Repeat::create(Sequence::create(delay_t, shoot, nullptr), 50);	
+	auto shootArray = Repeat::create(Sequence::create(delay_t, shoot, nullptr), 50);
 	//auto shootArray = RepeatForever::create(Sequence::create(delay_t, shoot, nullptr));
 
 	if (targetPos.x - attackPos.x > 0.00001f)
@@ -139,11 +143,15 @@ void Assasion::attack(const bool stay)
 		auto delayedShoot = Sequence::create(shootDelay, shootArray, nullptr);
 		delayedShoot->setTag(TAG_ACTION_SHOOT);
 		myHero->runAction(jump);
+		stopAnimation(TAG_ACTION_RUN);
+		startAniamtion("attack");
 		myHero->runAction(delayedShoot);
 	}
 	else
 	{
 		shootArray->setTag(TAG_ACTION_SHOOT);
+		stopAnimation(TAG_ACTION_RUN);
+		startAniamtion("attack");
 		myHero->runAction(shootArray);
 	}
 }

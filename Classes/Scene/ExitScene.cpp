@@ -1,14 +1,17 @@
 #include "ExitScene.h"
+
 static void problemLoading(const char* filename)
 {
     printf("Error while loading: %s\n", filename);
     printf("Depending on how you compiled you might have to add 'Resources/' in front of filenames in StartGameScene.cpp\n");
 }
 
+
 Scene* ExitScene::createScene()
 {
     return ExitScene::create();
 }
+
 
 bool ExitScene::init()
 {
@@ -51,8 +54,8 @@ bool ExitScene::init()
     }
     else
     {
-        float x = visibleSize.width/3;
-        float y = visibleSize.height/3+49;
+        float x = visibleSize.width / 3;
+        float y = visibleSize.height / 3 + 49;
         ReturnItem->setPosition(Vec2(x, y));
     }
     auto ExitItem = MenuItemImage::create(
@@ -67,7 +70,7 @@ bool ExitScene::init()
     }
     else
     {
-        float x = visibleSize.width / 3*2;
+        float x = visibleSize.width / 3 * 2;
         float y = visibleSize.height / 3 + 49;
         ExitItem->setPosition(Vec2(x, y));
     }
@@ -90,10 +93,12 @@ bool ExitScene::init()
     return true;
 }
 
+
 void ExitScene::menuReturn(Ref* pSender)
 {
     Director::getInstance()->popScene();
 }
+
 
 void ExitScene::menuExit(Ref* pSender)
 {

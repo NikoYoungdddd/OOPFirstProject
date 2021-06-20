@@ -1,10 +1,13 @@
 #include"Player.h"
+
 Player* Player::sharedPlayer = nullptr;
 extern int startToCountDown;
+
+
 Player::Player()
 {
     playerHP = MAX_PLAYER_HP;
-    playerGold = 10;
+    playerGold = 3;
     //此处改为了5
     myPlayer = nullptr;
     enemyHP = MAX_PLAYER_HP;
@@ -14,6 +17,7 @@ Player::Player()
     isAI = 0;
     server = 0;
 }
+
 
 Player* Player::getInstance()
 {
@@ -27,6 +31,7 @@ Player* Player::getInstance()
     return sharedPlayer;
 }
 
+
 bool Player::init()
 {
     if (!Layer::init())
@@ -35,25 +40,25 @@ bool Player::init()
     }
 
     myPlayer = Sprite::create(PLAYER_WINDOW);
-    myPlayer->setPosition(98 + myPlayer->getContentSize().width / 2, 98*10 - myPlayer->getContentSize().height / 2);
+    myPlayer->setPosition(98 + myPlayer->getContentSize().width / 2, 98 * 10 - myPlayer->getContentSize().height / 2);
     this->addChild(myPlayer);
     labelPlayerGold = Label::createWithTTF(StringUtils::format("%d", playerGold), "fonts/Marker Felt.ttf", 24);
-    labelPlayerGold->setPosition(98 + myPlayer->getContentSize().width / 3+ labelPlayerGold->getContentSize().width / 2,
+    labelPlayerGold->setPosition(98 + myPlayer->getContentSize().width / 3 + labelPlayerGold->getContentSize().width / 2,
         98 * 10 - myPlayer->getContentSize().height / 2 - 98 / 4);
     addChild(labelPlayerGold);
     labelPlayerGrade = Label::createWithTTF(StringUtils::format("%d", playerGrade), "fonts/Marker Felt.ttf", 24);
     labelPlayerGrade->setPosition(98 + myPlayer->getContentSize().width / 3 + labelPlayerGrade->getContentSize().width / 2,
         98 * 10 - myPlayer->getContentSize().height / 2 + 98 / 4);
     addChild(labelPlayerGrade);
-	Sprite* bloodSp = Sprite::create("blood.png");
-	bloodBar = ProgressTimer::create(bloodSp);
-	bloodBar->setType(ProgressTimer::Type::BAR);
-	bloodBar->setMidpoint(Point(0, 0.5));
-	bloodBar->setBarChangeRate(Point(1, 0));
-	bloodBar->setPercentage(100.f);
-    bloodBar->setPosition(98 + myPlayer->getContentSize().width / 2+98/4+bloodBar->getContentSize().width/2, 
-        98 * 10 - myPlayer->getContentSize().height / 2-98/4);
-	addChild(bloodBar);
+    Sprite* bloodSp = Sprite::create("blood.png");
+    bloodBar = ProgressTimer::create(bloodSp);
+    bloodBar->setType(ProgressTimer::Type::BAR);
+    bloodBar->setMidpoint(Point(0, 0.5));
+    bloodBar->setBarChangeRate(Point(1, 0));
+    bloodBar->setPercentage(100.f);
+    bloodBar->setPosition(98 + myPlayer->getContentSize().width / 2 + 98 / 4 + bloodBar->getContentSize().width / 2,
+        98 * 10 - myPlayer->getContentSize().height / 2 - 98 / 4);
+    addChild(bloodBar);
     Sprite* ExpSp = Sprite::create("exp.png");
     ExpBar = ProgressTimer::create(ExpSp);
     ExpBar->setType(ProgressTimer::Type::BAR);
@@ -63,7 +68,7 @@ bool Player::init()
     ExpBar->setPosition(98 + myPlayer->getContentSize().width / 2 + 98 / 4 + bloodBar->getContentSize().width / 2,
         98 * 10 - myPlayer->getContentSize().height / 2);
     addChild(ExpBar);
-    labelPlayerHP = Label::createWithTTF(StringUtils::format("%d/%d", playerHP,MAX_PLAYER_HP), "fonts/Marker Felt.ttf", 20);
+    labelPlayerHP = Label::createWithTTF(StringUtils::format("%d/%d", playerHP, MAX_PLAYER_HP), "fonts/Marker Felt.ttf", 20);
     labelPlayerHP->setPosition(98 + myPlayer->getContentSize().width / 2 + 98 / 4 + bloodBar->getContentSize().width / 2,
         98 * 10 - myPlayer->getContentSize().height / 2 - 98 / 4);
     addChild(labelPlayerHP);
@@ -73,7 +78,7 @@ bool Player::init()
     addChild(labelPlayerExp);
 
     auto AIPlayer = Sprite::create(ENEMY_WINDOW);
-    AIPlayer->setPosition(98*8 + AIPlayer->getContentSize().width / 2, 98 * 10 - AIPlayer->getContentSize().height / 2);
+    AIPlayer->setPosition(98 * 8 + AIPlayer->getContentSize().width / 2, 98 * 10 - AIPlayer->getContentSize().height / 2);
     this->addChild(AIPlayer);
     Sprite* AIbloodSp = Sprite::create("bloodEnemy.png");
     AIbloodBar = ProgressTimer::create(AIbloodSp);
@@ -81,11 +86,11 @@ bool Player::init()
     AIbloodBar->setMidpoint(Point(0, 0.5));
     AIbloodBar->setBarChangeRate(Point(1, 0));
     AIbloodBar->setPercentage(100.f);
-    AIbloodBar->setPosition(98*8 + AIPlayer->getContentSize().width / 2 +  AIbloodBar->getContentSize().width / 2,
-        98 * 10 - AIPlayer->getContentSize().height / 2 - 98/6.0f*0.75f);
+    AIbloodBar->setPosition(98 * 8 + AIPlayer->getContentSize().width / 2 + AIbloodBar->getContentSize().width / 2,
+        98 * 10 - AIPlayer->getContentSize().height / 2 - 98 / 6.0f * 0.75f);
     addChild(AIbloodBar);
     labelAIHP = Label::createWithTTF(StringUtils::format("%d/%d", enemyHP, MAX_PLAYER_HP), "fonts/Marker Felt.ttf", 20);
-    labelAIHP->setPosition(98*8 + AIPlayer->getContentSize().width / 2 + AIbloodBar->getContentSize().width / 2,
+    labelAIHP->setPosition(98 * 8 + AIPlayer->getContentSize().width / 2 + AIbloodBar->getContentSize().width / 2,
         98 * 10 - AIPlayer->getContentSize().height / 2 - 98 / 6.0f * 0.75f);
     addChild(labelAIHP);
 
@@ -94,16 +99,17 @@ bool Player::init()
     return true;
 }
 
+
 void  Player::update(float dt)
 {
     labelPlayerGold->setString(StringUtils::format("%d", playerGold));
     labelPlayerGrade->setString(StringUtils::format("%d", playerGrade));
-    labelPlayerExp->setString(StringUtils::format( "%d/%d", playerExp, playerExpPerGrade[playerGrade - 1]));
+    labelPlayerExp->setString(StringUtils::format("%d/%d", playerExp, playerExpPerGrade[playerGrade - 1]));
     labelPlayerHP->setString(StringUtils::format("%d/%d", playerHP, MAX_PLAYER_HP));
-	bloodBar->setPercentage(static_cast<float>(playerHP) / MAX_PLAYER_HP * 100.f);
+    bloodBar->setPercentage(static_cast<float>(playerHP) / MAX_PLAYER_HP * 100.f);
     AIbloodBar->setPercentage(static_cast<float>(enemyHP) / MAX_PLAYER_HP * 100.f);
     labelAIHP->setString(StringUtils::format("%d/%d", enemyHP, MAX_PLAYER_HP));
-    ExpBar->setPercentage(static_cast<float>(playerExp) / playerExpPerGrade[playerGrade-1] * 100.f);
+    ExpBar->setPercentage(static_cast<float>(playerExp) / playerExpPerGrade[playerGrade - 1] * 100.f);
     while (playerExp >= playerExpPerGrade[playerGrade - 1])
     {
         playerExp -= playerExpPerGrade[playerGrade - 1];
@@ -112,20 +118,21 @@ void  Player::update(float dt)
     }
 }
 
+
 void Player::addHeroClick(const std::string& heroName)
 {
-	if ("Tank.png" == heroName)
-		heroOnReady.push_back(Type_Tank);
-	else if ("Assasion.png" == heroName)
-		heroOnReady.push_back(Type_Assasion);
-	else if ("ADC.png" == heroName)
-		heroOnReady.push_back(Type_ADC);
-	else if ("AP.png" == heroName)
-		heroOnReady.push_back(Type_AP);
-	else if ("AOE.png" == heroName)
-		heroOnReady.push_back(Type_AOE);
+    if ("Tank.png" == heroName)
+        heroOnReady.push_back(Type_Tank);
+    else if ("Assasion.png" == heroName)
+        heroOnReady.push_back(Type_Assasion);
+    else if ("ADC.png" == heroName)
+        heroOnReady.push_back(Type_ADC);
+    else if ("AP.png" == heroName)
+        heroOnReady.push_back(Type_AP);
+    else if ("AOE.png" == heroName)
+        heroOnReady.push_back(Type_AOE);
 
-    heroOnReadyNum ++;
+    heroOnReadyNum++;
 }
 
 
@@ -135,6 +142,7 @@ Sprite* Player::getPlayer()
         return nullptr;
     return myPlayer;
 }
+
 
 void Player::playerUpgrade()
 {

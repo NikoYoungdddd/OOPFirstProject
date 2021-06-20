@@ -2,16 +2,17 @@
 
 Tank::Tank()
 {
-	
-	this->m_HP = 3000;
+
+	this->m_HP = 2800;
 	this->m_Status.m_Damage.m_PhysicalDamage = 150;
 	this->m_Status.m_Damage.m_PowerDamage = 0;
-	this->m_Status.m_Defense.m_PhysicalDefense = 100;
+	this->m_Status.m_Defense.m_PhysicalDefense = 50;
 	this->m_Status.m_Defense.m_PowerDefense = 0;
-	this->m_Status.m_AttackFrequency = 20;
+	this->m_Status.m_AttackFrequency = 30;
 	this->m_Cost = 1;
 	this->m_Type = Type_Tank;
 	this->m_Star = 1;
+
 	boardX = -1;
 	boardY = -1;
 }
@@ -52,6 +53,7 @@ void Tank::moveSearch(std::pair<Vec2, int>(&board)[8][8], const Vec2& endDest, V
 
 }
 
+
 void Tank::searchEnemy(std::pair<Vec2, int>(&board)[8][8], const bool stay)
 {
 	Vec2 startDest = myHero->getPosition();
@@ -86,24 +88,25 @@ void Tank::searchEnemy(std::pair<Vec2, int>(&board)[8][8], const bool stay)
 	moveDuration = shortestLen / SPEED;
 }
 
+
 void Tank::attack(const bool stay)
 {
 	float ff = ATTACK_DURATION_MARK / m_Status.m_AttackFrequency;
-	
+
 	float distance = sqrt((attackPos.x - targetPos.x) * (attackPos.x - targetPos.x)
 		+ (attackPos.y - targetPos.y) * (attackPos.y - targetPos.y));
-	
+
 	int dampdeRate = 1;
 	if (distance > maxDistance[m_Type])
 		dampdeRate++;
 	auto shoot = CallFunc::create([=]() {
-		auto attackBullet = HeroBullet::create(heroBulletName[m_Type], this->m_Status.m_Damage/ dampdeRate);
+		auto attackBullet = HeroBullet::create(heroBulletName[m_Type], this->m_Status.m_Damage / dampdeRate);
 		attackBullet->setBulletPos(myHero->getPosition());
 		attackBullet->setBulletScale(heroBulletScale[m_Type]);
 		attackBullet->bulletBuild(isEnemy);
 		attackBullet->setBulletRotation(targetPos);
 		this->addChild(attackBullet);
-		
+
 		auto pointMove = MoveTo::create(ff, targetPos);
 		auto pointMoveDone = RemoveSelf::create();
 		attackBullet->shootBullet(Sequence::create(pointMove, pointMoveDone, nullptr));
@@ -111,7 +114,7 @@ void Tank::attack(const bool stay)
 
 	auto delay_t = DelayTime::create(ff);
 	auto shootArray = Repeat::create(Sequence::create(delay_t, shoot, nullptr), 50);
-		
+
 	if (targetPos.x - attackPos.x > 0.00001f)
 	{
 		this->setOrientation(TO_RIGHT);
@@ -127,11 +130,16 @@ void Tank::attack(const bool stay)
 		auto delayedShoot = Sequence::create(shootDelay, shootArray, nullptr);
 		delayedShoot->setTag(TAG_ACTION_SHOOT);
 		myHero->runAction(move);
+		stopAnimation(TAG_ACTION_RUN);
+		startAniamtion("attack");
 		myHero->runAction(delayedShoot);
 	}
 	else
 	{
+		stopAnimation(TAG_ACTION_RUN);
+		startAniamtion("attack");
 		shootArray->setTag(TAG_ACTION_SHOOT);
 		myHero->runAction(shootArray);
 	}
 }
+

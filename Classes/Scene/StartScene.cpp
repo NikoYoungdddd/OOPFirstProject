@@ -8,18 +8,22 @@ static void problemLoading(const char* filename)
     printf("Error while loading: %s\n", filename);
     printf("Depending on how you compiled you might have to add 'Resources/' in front of filenames in StartGameScene.cpp\n");
 }
+
+
 Scene* StartScene::createScene()
 {
     return StartScene::create();
 }
+
+
 bool StartScene::init()
 {
     if (!Scene::init())
     {
         return false;
     }
-   
-    BGMID =AudioEngine::play2d(BGM_START, true, .5);
+
+    BGMID = AudioEngine::play2d(BGM_START, true, .5);
     ifBgmOn = true;
 
     auto visibleSize = Director::getInstance()->getVisibleSize();
@@ -38,7 +42,7 @@ bool StartScene::init()
     else
     {
         float x = origin.x + visibleSize.width - closeItem->getContentSize().width / 2;
-        float y = origin.y - closeItem->getContentSize().height / 2+98*10;
+        float y = origin.y - closeItem->getContentSize().height / 2 + 98 * 10;
         closeItem->setPosition(Vec2(x, y));
     }
     auto startItem = MenuItemImage::create(
@@ -63,7 +67,7 @@ bool StartScene::init()
     this->addChild(menu, 1);
     auto MusicBt = Sprite::create(MUSIC_BUTTON_BACKGROUND);
     auto BackGround = Sprite::create(START_BACKGROUND);
-    if (MusicBt == nullptr|| BackGround == nullptr)
+    if (MusicBt == nullptr || BackGround == nullptr)
     {
         problemLoading("'button/musicItemBg.png'and'background/startBg.png'");
     }
@@ -71,7 +75,7 @@ bool StartScene::init()
     {
         BackGround->setPosition(Vec2(visibleSize.width / 2 + origin.x, visibleSize.height / 2 + origin.y));
         this->addChild(BackGround, 0);
-        float x = origin.x + visibleSize.width - MusicBt->getContentSize().width / 2*3;
+        float x = origin.x + visibleSize.width - MusicBt->getContentSize().width / 2 * 3;
         float y = origin.y - MusicBt->getContentSize().height / 2 + 98 * 10;
         MusicBt->setPosition(Vec2(x, y));
         this->addChild(MusicBt, 1);
@@ -87,24 +91,30 @@ bool StartScene::init()
     {
         if (!ifBgmOn)
             musicItem->setColor(Color3B(20, 20, 20));
-        float x = origin.x + visibleSize.width - musicItem->getContentSize().width / 2*3;
-        float y = origin.y - musicItem->getContentSize().height / 2+98*10;
+        float x = origin.x + visibleSize.width - musicItem->getContentSize().width / 2 * 3;
+        float y = origin.y - musicItem->getContentSize().height / 2 + 98 * 10;
         musicItem->setPosition(Vec2(x, y));
         musicItem->addClickEventListener([&](Ref*) { changMusicPlayEvent(); });
         this->addChild(musicItem, 2, 77);
     }
-   
+
     return true;
 }
+
+
 void StartScene::CloseCallback(Ref* pSender)
 {
     Director::getInstance()->pushScene(ExitScene::createScene());
 }
+
+
 void StartScene::StartCallback(Ref* pSender)
 {
-    AudioEngine::pause(BGMID);
-    Director::getInstance()->replaceScene(TransitionMoveInB::create(1.0f, ChooseScene::createScene()));
+    //AudioEngine::pause(BGMID);
+    Director::getInstance()->replaceScene(TransitionFade::create(0.5f, ChooseScene::createScene()));
 }
+
+
 void StartScene::changMusicPlayEvent() {
 
     if (ifBgmOn) {

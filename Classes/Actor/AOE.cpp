@@ -11,9 +11,12 @@ AOE::AOE()
 	this->m_Status.m_AttackFrequency = 20;
 	this->m_Cost = 3;
 	this->m_Star = 1;
+
 	boardX = -1;
 	boardY = -1;
 }
+
+
 void AOE::moveSearch(std::pair<Vec2, int>(&board)[8][8], const Vec2& endDest, Vec2& stayPos)
 {
 	int flag = 1;
@@ -49,13 +52,15 @@ void AOE::moveSearch(std::pair<Vec2, int>(&board)[8][8], const Vec2& endDest, Ve
 		}
 	}
 }
+
+
 void AOE::searchEnemy(std::pair<Vec2, int>(&board)[8][8], const bool stay)
 {
-	
+
 	Vec2 startDest = myHero->getPosition();
 	Vec2 endDest = *(vecPos.begin());
 	Vec2 endDest2 = endDest;
-	
+
 	Vec2 stayPos = startDest;
 	float shortestLen = sqrt((startDest.x - endDest.x) * (startDest.x - endDest.x) +
 		(startDest.y - endDest.y) * (startDest.y - endDest.y));
@@ -74,11 +79,11 @@ void AOE::searchEnemy(std::pair<Vec2, int>(&board)[8][8], const bool stay)
 		}
 	}
 
-	
+
 	if (!stay)
 	{
-	
-		moveSearch(board,endDest,stayPos);
+
+		moveSearch(board, endDest, stayPos);
 	}
 	else
 	{
@@ -89,10 +94,11 @@ void AOE::searchEnemy(std::pair<Vec2, int>(&board)[8][8], const bool stay)
 	moveDuration = shortestLen / SPEED;
 }
 
+
 void AOE::attack(const bool stay)
 {
 	float ff = ATTACK_DURATION_MARK / m_Status.m_AttackFrequency;
-	
+
 	float distance = sqrt((attackPos.x - targetPos.x) * (attackPos.x - targetPos.x)
 		+ (attackPos.y - targetPos.y) * (attackPos.y - targetPos.y));
 	int dampdeRate = 1;
@@ -100,7 +106,7 @@ void AOE::attack(const bool stay)
 		dampdeRate++;
 
 	auto shoot = CallFunc::create([=]() {
-		auto attackBullet = HeroBullet::create(heroBulletName[m_Type], this->m_Status.m_Damage/ dampdeRate);
+		auto attackBullet = HeroBullet::create(heroBulletName[m_Type], this->m_Status.m_Damage / dampdeRate);
 		attackBullet->setBulletPos(myHero->getPosition());
 		attackBullet->setBulletScale(heroBulletScale[m_Type]);
 		attackBullet->bulletBuild(isEnemy);
@@ -110,7 +116,7 @@ void AOE::attack(const bool stay)
 		auto pointMoveDone = RemoveSelf::create();
 		attackBullet->shootBullet(Sequence::create(pointMove, pointMoveDone, nullptr));
 
-		auto attackBullet2 = HeroBullet::create(heroBulletName[m_Type], this->m_Status.m_Damage/ dampdeRate);
+		auto attackBullet2 = HeroBullet::create(heroBulletName[m_Type], this->m_Status.m_Damage / dampdeRate);
 		attackBullet2->setBulletPos(myHero->getPosition());
 		attackBullet2->setBulletScale(heroBulletScale[m_Type]);
 		attackBullet2->bulletBuild(isEnemy, true);
@@ -119,7 +125,7 @@ void AOE::attack(const bool stay)
 		auto pointMove2 = MoveTo::create(ff, targetPos);
 		auto pointMoveDone2 = RemoveSelf::create();
 		auto dlay = DelayTime::create(0.5f);
-		attackBullet2->shootBullet(Sequence::create(dlay,pointMove2, pointMoveDone2, nullptr));
+		attackBullet2->shootBullet(Sequence::create(dlay, pointMove2, pointMoveDone2, nullptr));
 
 		});
 
@@ -143,11 +149,16 @@ void AOE::attack(const bool stay)
 		auto delayedShoot = Sequence::create(shootDelay, shootArray, nullptr);
 		delayedShoot->setTag(TAG_ACTION_SHOOT);
 		myHero->runAction(move);
+		stopAnimation(TAG_ACTION_RUN);
+		startAniamtion("attack");
 		myHero->runAction(delayedShoot);
 	}
 	else
 	{
 		shootArray->setTag(TAG_ACTION_SHOOT);
+		stopAnimation(TAG_ACTION_RUN);
+		startAniamtion("attack");
 		myHero->runAction(shootArray);
 	}
 }
+

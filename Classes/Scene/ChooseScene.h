@@ -1,17 +1,28 @@
 #ifndef __CHOOSE_SCENE_H__
 #define __CHOOSE_SCENE_H__
-#include "GameScene.h"
+
+
 #include "Const/Const.h"
-USING_NS_CC;
-class ChooseScene : public cocos2d::Scene
+#include "GameScene.h"
+
+/*选择游戏模式为联机或AI对战*/
+class ChooseScene : public Scene
 {
+
 public:
-	static cocos2d::Scene* createScene();
+	static Scene* createScene();
+	
 	virtual bool init();
+	
+	//选择AI对战 
 	void menuAI(Ref* pSender);
+	
+	//选择联机对战（本人为房主） 
 	void menuServer(Ref* pSender);
+	
+	//选择联机对战（加入房间） 
 	void menuClient(Ref* pSender);
+	
 	CREATE_FUNC(ChooseScene);
 };
 #endif
-
