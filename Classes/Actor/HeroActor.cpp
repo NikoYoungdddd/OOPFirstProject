@@ -59,17 +59,9 @@ void HeroActor::setAlive(bool is)
 
 void  HeroActor::update()
 {
-	if (m_Star == 1)
-		bloodBar->setPosition((myHero->getPosition() + offset));
-	else
-		bloodBar->setPosition((myHero->getPosition() + offset * STARS_UP));
+	bloodBar->setPosition((myHero->getPosition() + offset));
 	if (isAlive)
-	{
-		if (m_Star == 1)
-			bloodBar->setPercentage(static_cast<float>(this->m_HP) / HeroHp[m_Type] * 100.f);
-		else
-			bloodBar->setPercentage(static_cast<float>(this->m_HP) / (HeroHp[m_Type] * STARS_UP) * 100.f);
-	}
+		bloodBar->setPercentage(static_cast<float>(this->m_HP) / HeroHp[m_Type] * 100.f);
 	else
 		bloodBar->setPercentage(0);
 }
@@ -119,10 +111,7 @@ void HeroActor::resetHero()
 	isAlive = true;
 	isTargetAlive = true;
 	dieOnce = false;
-	if(m_Star==1)
-		m_HP = static_cast<unsigned int>(HeroHp[m_Type]);
-	else
-		m_HP = static_cast<unsigned int>(HeroHp[m_Type] * STARS_UP);
+	m_HP = static_cast<unsigned int>(HeroHp[m_Type]);
 	myHero->setFlippedX(isEnemy);
 	resetHeroTag();
 	setHeroOpacity(255);
@@ -203,19 +192,13 @@ void HeroActor::heroBuild()
 
 void HeroActor::changeHeroTag(const int t)
 {
+
 	myHero->setTag(t);
 }
 
 void HeroActor::resetHeroTag()
 {
 	myHero->setTag(m_Tag);
-}
-
-void HeroActor::starsUP()
-{
-	m_Star++;
-	m_Status *= STARS_UP;
-	myHero->setScale(HERO_SCALE * STARS_UP);
 }
 
 Animate* HeroActor::createAnimate(const char* action)

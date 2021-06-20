@@ -8,10 +8,9 @@ Tank::Tank()
 	this->m_Status.m_Damage.m_PowerDamage = 0;
 	this->m_Status.m_Defense.m_PhysicalDefense = 100;
 	this->m_Status.m_Defense.m_PowerDefense = 0;
-	this->m_Status.m_AttackFrequency = 30;
+	this->m_Status.m_AttackFrequency = 3;
 	this->m_Cost = 1;
 	this->m_Type = Type_Tank;
-	this->m_Star = 1;
 	boardX = -1;
 	boardY = -1;
 }

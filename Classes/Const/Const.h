@@ -1,7 +1,7 @@
 #ifndef __CONST_H__
 #define __CONST_H__
 
-//#include<string>
+#include<string>
 #include"cocos2d.h"
 #include"Structs.h"
 USING_NS_CC;
@@ -10,15 +10,16 @@ USING_NS_CC;
 #define ROUND_END_TIME 5.f
 
 #define MAX_PLAYER_HP 20
-#define STARS_UP 1.2f
 
 #define SPEED 500.f
-#define ATTACK_DURATION_MARK 50.f
+#define ATTACK_DURATION_MARK 5.f
 #define HERO_SCALE 1.f
 #define HERO_TOUCH_SIZE 0.5f
 #define HERO_SCALE_IN_PURCHASE 0.3f
+#define GOLD_SCALE_IN_PURCHASE 0.9f
+#define UPGRADE_SCALE_IN_GAMESCENE 0.8f
 #define BLOODBAR_SCALE 0.6f
-#define EQUIPMENT_SCALE 0.3f
+#define EQUIPMENT_SCALE 0.22f//此处为了符合装备栏大小改了
 
 #define TAG_ACTION_SHOOT 999
 #define TAG_ACTION_RUN 888
@@ -82,13 +83,14 @@ const float heroBulletScale[5]{0.4f,0.3f,0.3f,0.5f,0.2f};
 const std::string heroBulletName[5]{"bullet/Tankbullet.png","bullet/Assasionbullet.png" ,"bullet/ADCbullet.png",
 									"bullet/APbullet.png" ,"bullet/AOEbullet.png" };
 const std::string heroName[5]{ "Tank.png","Assasion.png","ADC.png","AP.png","AOE.png" };
+const int heroPrice[5]{ 3,3,2,1,1 };
 const std::string weaponName[4]{ "buff/physicBuff.png","buff/powerBuff.png","buff/frequencyBuff.png","buff/allBuff.png" };
 const float putPos[5] = { 3.f,2.4f,2.f,1.7f,1.5f };
 
 const STATUS powerBuff(50, 0, 0, 100, 0);
 const STATUS physicBuff(0, 50, 100, 0, 0);
-const STATUS frequencyBuff(0, 0, 0, 0, 20);
-const STATUS allBuff(40, 40, 40, 40, 10);
+const STATUS frequencyBuff(0, 0, 0, 0, 2);
+const STATUS allBuff(40, 40, 40, 40, 1);
 
 
 //音乐
@@ -98,11 +100,20 @@ const STATUS allBuff(40, 40, 40, 40, 10);
 //图标,注意下面3张在startscene,startgame的cpp里面有problemloading改不了
 #define CLOSE_BUTTON "closeItem.png"
 #define START_BUTTON "startItem.png"
+#define UPGRADE_BUTTON "upgradeItem.png"
+#define MUSIC_BUTTON_CONTENT "music_button_content.png"
+#define MUSIC_BUTTON_BACKGROUND "music_button_bg.png"
 #define START_BACKGROUND "startBg.png"
+#define PLAYER_WINDOW "playerWindow.png"
+#define CHAT_WINDOW "chatBg.png"
+#define SEND_BUTTON "chatSendItem.png"
 #define CHESS_PURCHASE "ChessSelected.png"
 #define PURCHASE_BACKGROUND "purchaseBg.png"
+#define PURCHASE_BGMAP "purchaseSceneMap.png"
+#define GOLD "gold.png"
 //标题
 #define TITLE "Enjoy autochess!"
+#define PURCHASE "Purchase your chess!"
 //地图
 #define MAP "chessboard3.tmx"
 

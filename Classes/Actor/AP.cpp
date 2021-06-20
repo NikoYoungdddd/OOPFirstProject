@@ -7,10 +7,9 @@ AP::AP()
 	this->m_Status.m_Damage.m_PowerDamage = 300;
 	this->m_Status.m_Defense.m_PhysicalDefense = 50;
 	this->m_Status.m_Defense.m_PowerDefense = 200;
-	this->m_Status.m_AttackFrequency = 20;
+	this->m_Status.m_AttackFrequency = 2;
 	this->m_Type = Type_AP;
 	this->m_Cost = 2;
-	this->m_Star = 1;
 	boardX = -1;
 	boardY = -1;
 }

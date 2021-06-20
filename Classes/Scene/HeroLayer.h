@@ -55,7 +55,6 @@ public:
 
 	//ÔİÊ±ÎŞÓÃ
 	void searchAgain(std::vector<HeroActor*>&vecHero,const std::vector<Vec2>& vecPos,const int side);
-<<<<<<< HEAD
 
 	//»Øµ½Ã¿¾Ö¿ªÊ¼µÄÎ»ÖÃ
 	void boardReset(float dt);
@@ -67,28 +66,7 @@ public:
 
 	void updateHeros();
 
-=======
-
-	//å›åˆ°æ¯å±€å¼€å§‹çš„ä½ç½®
-	void boardReset(float dt);
-	//ç©ºå®ç°ï¼Œé…åˆè°ƒåº¦å™¨äº§ç”Ÿå»¶æ—¶ä½œç”¨
-	void timeCountDown(float dt);
-
-
-	void updateEquipment();
-
-	void updateHeros();
-
->>>>>>> main
 	void createEquipment(const Vec2& pos);
-
-
-	//Ä¿Ç°Ö§³Ö
-	//3-4¸öÔÚ×¼±¸Î»ÖÃ
-	//1¸öÔÚÆåÅÌ£¬2¸ö×¼±¸
-	//2¸öÔÚÆåÅÌ£¬1¸öÔÚ×¼±¸
-	void heroStarsUP();
-	
 public:
 	std::pair<Vec2, int> board[8][8];
 	std::pair<Vec2, int> readyPos[8];
@@ -99,14 +77,9 @@ public:
 	std::vector<HeroActor*>vecHeroOnReady;
 	//std::vector<HeroActor*>vecHeroOnBoard;
 
-	int arrayHeroNum[5]={};
-
 	bool isStartNewRound = false;
 	bool isGameStart = false;
 	
-	unsigned int AIGold = 4;
-	unsigned int AIExp = 0;
-	unsigned int AILevel = 1;
 private:
 	std::vector<Vec2> vecAIHeroPos;  //µĞ·½Î»ÖÃ
 	std::vector<Vec2> vecMyHeroPos;  //ÎÒ·½Î»ÖÃ

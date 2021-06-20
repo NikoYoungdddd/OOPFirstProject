@@ -12,9 +12,11 @@ public:
 
     virtual bool init();
 
-    void menuCloseCallback(cocos2d::Ref* pSender);
     void menuReturn(Ref* pSender);
+    void PurchaseScene::update(float dt);
     CREATE_FUNC(PurchaseScene);
-
+private:
+    unsigned int num;
+    Label* labelPlayerGold;
 };
 #endif

@@ -2,9 +2,12 @@
 #define __GAME_SCENE_H__
 
 #include "Const/Const.h"
-#include "Player.h"
 #include "HeroLayer.h"
 #include "PurchaseScene.h"
+#include "AudioEngine.h"
+#include "ui/CocosGUI.h"
+#include "Player.h"
+#include "ChatLayer.h"
 class GameScene : public cocos2d::Scene
 {
 public:
@@ -13,13 +16,12 @@ public:
     virtual bool init();
 
     CREATE_FUNC(GameScene);
-    void menuCloseCallback(cocos2d::Ref* pSender);
+    void menuCloseCallback(Ref* pSender);
     void menuToPurchaseLayer(Ref* pSender);
     void update(float dt);
-
+    void changMusicPlayEvent();
 public:
     unsigned int num;
-
     HeroLayer* heroLayer;
 };
 

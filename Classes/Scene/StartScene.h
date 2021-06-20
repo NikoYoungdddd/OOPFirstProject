@@ -4,6 +4,7 @@
 #include "Const/Const.h"
 #include "AudioEngine.h"
 #include "GameScene.h"
+#include "ui/CocosGUI.h"
 
 class StartScene : public cocos2d::Scene
 {
@@ -14,7 +15,7 @@ public:
 
     void StartCallback(cocos2d::Ref* pSender);
     void CloseCallback(Ref* pSender);
-    
+    void changMusicPlayEvent();
     CREATE_FUNC(StartScene);
 };
 #endif

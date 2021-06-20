@@ -113,7 +113,6 @@ void  HeroLayer::createHeroOnReady(const int type)
 				break;
 			}
 		}
-		arrayHeroNum[type]++;
 		hero->setHeroPos(pos);
 		this->addChild(hero);
 		vecHeroOnReady.push_back(hero);
@@ -167,149 +166,6 @@ void HeroLayer::createHero(const int type, const int x, const int y, bool isAI)
 			vecAIHeroBoardPos.push_back(std::make_pair(x, y));
 		}
 		this->addChild(hero);
-	}
-}
-
-void HeroLayer::heroStarsUP()
-{
-	int numOnBoard = 0, numOnReady = 0;
-	int herotype = 6;
-	for (int type = 0; type < 5; type++)
-	{
-		if (arrayHeroNum[type] >= 3)
-		{
-			herotype = type;
-			for (auto hero : vecMyHeros)
-			{
-				if (hero->m_Type == type && hero->m_Star == 1)
-				{
-					numOnBoard++;
-				}
-			}
-			for (auto hero : vecHeroOnReady)
-			{
-				if (hero->m_Type == type && hero->m_Star == 1)
-				{
-					numOnReady++;
-				}
-			}
-			if (numOnBoard + numOnReady >= 3)
-				arrayHeroNum[herotype] -= 2;
-			break;
-		}
-	}
-	if (numOnBoard + numOnReady >= 3)
-	{
-		if (numOnBoard != 0)
-		{
-			if (numOnBoard == 1)
-			{
-				for (auto &hero : vecMyHeros)
-				{
-					if (hero->m_Type == herotype && hero->m_Star == 1)
-					{
-						hero->starsUP();
-						break;
-					}
-				}
-				int n = 0, i = 0;
-				int arr[5]{};
-				for (auto hero : vecHeroOnReady)
-				{					
-					if (hero->m_Type == herotype && hero->m_Star == 1)
-					{
-						arr[n++] = i;
-						if (n <= 2)
-						{
-							auto pos = hero->getBoardPos();
-							readyPos[pos.second].second = EMPTY;
-							this->removeChild(hero);
-						}
-					}
-					i++;
-				}
-				vecHeroOnReady.erase(vecHeroOnReady.begin() + arr[1]);
-				vecHeroOnReady.erase(vecHeroOnReady.begin() + arr[0]);
-			}
-			else if (numOnBoard == 2)
-			{
-				int n = 0, i = 0;
-				int arr[5]{};
-				bool isFind = false;
-				for (auto& hero : vecMyHeros)
-				{
-					if (!isFind)
-					{
-						if (hero->m_Type == herotype && hero->m_Star == 1)
-						{
-							isFind = true;
-							arr[n++] = i;
-						}
-					}
-					else
-					{
-						if (hero->m_Type == herotype && hero->m_Star == 1)
-						{
-							arr[n++] = i;
-							if (n <= 2)
-							{
-								auto pos = hero->getBoardPos();
-								board[pos.first][pos.second].second = EMPTY;
-								this->removeChild(hero);
-							}
-						}
-					}
-					i++;
-				}
-				vecMyHeros.erase(vecMyHeros.begin() + arr[1]);
-
-				int m = 0;
-				for (auto &hero : vecHeroOnReady)
-				{
-					if (hero->m_Type == herotype && hero->m_Star == 1)
-					{
-						this->removeChild(hero);
-						break;
-					}
-					m++;
-				}
-				vecHeroOnReady.erase(vecHeroOnReady.begin() + m);
-			}
-		}
-		else
-		{
-			bool isFind = false;
-			int arr[8]{};
-			int n = 0, i = 0;
-			for (auto& hero : vecHeroOnReady)
-			{			
-				if (!isFind)
-				{
-					if (hero->m_Type == herotype && hero->m_Star == 1)
-					{
-						isFind = true;
-						arr[n++] = i;
-					}
-				}
-				else
-				{
-					if (hero->m_Type == herotype && hero->m_Star == 1)
-					{
-						arr[n++] = i;
-						if (n <= 3)
-						{
-							auto pos = hero->getBoardPos();
-							readyPos[pos.second].second = EMPTY;
-							this->removeChild(hero);
-						}
-					}
-				}
-				i++;
-			}
-			vecHeroOnReady.erase(vecHeroOnReady.begin() + arr[2]);
-			vecHeroOnReady.erase(vecHeroOnReady.begin() + arr[1]);
-			vecHeroOnReady[arr[0]]->starsUP();
-		}
 	}
 }
 
@@ -473,20 +329,6 @@ void HeroLayer::updateHeros()
 		}
 		if (numAIHeros == 0 || numMyHeros == 0)
 		{
-			if (numAIHeros == 0)
-			{
-				Player::getInstance()->playerGold += 5;
-				Player::getInstance()->enemyHP -= 5;
-				AIGold += 2;
-			}
-			else
-			{
-				Player::getInstance()->playerGold += 2;
-				Player::getInstance()->playerHP -= 5;
-				AIGold += 5;
-			}
-			Player::getInstance()->playerExp += 2;
-
 			isUpdate = false;
 			createEquipment(board[5][5].first);
 			//定时器是同时开始的
@@ -520,7 +362,8 @@ void HeroLayer::updateEquipment()
 			std::string eName = equip->getEquipment();
 			Sprite* equipSprite = Sprite::create(eName);
 			equipSprite->setScale(EQUIPMENT_SCALE);
-			equipSprite->setPosition(Vec2(98 * .5f, 98.f * ((8 - eqpnum) + 1.5f)));
+			equipSprite->setPosition(Vec2(98 * 2.5f+ eqpnum*25+25/2, 98*10-25/2 ));
+			//此处做了改变
 			eqpnum++;
 			this->addChild(equipSprite);
 			vecEquipment.push_back(equipSprite);
@@ -578,7 +421,6 @@ HeroLayer* HeroLayer::create()
 
 void HeroLayer::update(float ft)
 {
-	heroStarsUP();
 	updateEquipment();
 	updateHeros();
 }

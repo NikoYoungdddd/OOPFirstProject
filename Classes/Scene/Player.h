@@ -18,33 +18,20 @@ public:
     Sprite* getPlayer();
 
     void addHeroClick(const std::string& heroName);
-
+    void playerUpgrade();
     void update(float dt);
 
 public:
     unsigned int playerHP;
-  
-    unsigned int enemyHP;
-
-    unsigned int playerGold;
-    
-    unsigned int playerLevel;
-    
-    unsigned int playerExp;
+    unsigned int playerGold;//表示现有金币（数量）
     Sprite* myPlayer;
     ProgressTimer* bloodBar;
-
+    Label* labelPlayerGold;//表示现有金币的显示（文字）
     std::vector<int>heroOnReady;
     std::vector<Vec2>heroOnReadyPos;
-
     std::vector<int> heroOnStage;
-    
     std::vector<Vec2>heroONStagePos;
-
-
-    //"Blood:20 heroNumb:5 heroonready: 1,3,3,2,3   herovec: 1,2 2,3 "
     unsigned int heroOnReadyNum = 0;
-    
     unsigned int heroOnStageNum = 0;
 
 

@@ -1,8 +1,14 @@
 #include "AppDelegate.h"
-#include "Scene/GameScene.h"
 #include "Scene/StartScene.h"
+// #define USE_AUDIO_ENGINE 1
+
+#if USE_AUDIO_ENGINE
+#include "audio/include/AudioEngine.h"
+using namespace cocos2d::experimental;
+#endif
 
 USING_NS_CC;
+
 static cocos2d::Size designResolutionSize = cocos2d::Size(1176, 980);
 
 AppDelegate::AppDelegate()
@@ -35,28 +41,28 @@ bool AppDelegate::applicationDidFinishLaunching() {
 	auto glview = director->getOpenGLView();
 	if (!glview) {
 #if (CC_TARGET_PLATFORM == CC_PLATFORM_WIN32) || (CC_TARGET_PLATFORM == CC_PLATFORM_MAC) || (CC_TARGET_PLATFORM == CC_PLATFORM_LINUX)
-		glview = GLViewImpl::createWithRect("HelloWorld", cocos2d::Rect(0, 0, designResolutionSize.width, designResolutionSize.height));
+		glview = GLViewImpl::createWithRect("Enjoy Autochess!", cocos2d::Rect(0, 0, designResolutionSize.width, designResolutionSize.height));
 #else
-		glview = GLViewImpl::create("HelloWorld");
+		glview = GLViewImpl::create("Enjoy Autochess!");
 #endif
 		director->setOpenGLView(glview);
 	}
 
-	director->setDisplayStats(true);
+	director->setDisplayStats(false);
 
 	director->setAnimationInterval(1.0f / 60);
 
 	
 	glview->setDesignResolutionSize(designResolutionSize.width, designResolutionSize.height, ResolutionPolicy::NO_BORDER);
 
-	auto scene =StartScene::createScene();
+	auto scene = StartScene::createScene();
 
 	director->runWithScene(scene);
 
 	return true;
 }
 
-// This function will be called when the app is inactive. Note, when receiving a phone call it is invoked.
+
 void AppDelegate::applicationDidEnterBackground() {
 	Director::getInstance()->stopAnimation();
 

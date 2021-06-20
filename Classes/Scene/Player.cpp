@@ -4,10 +4,8 @@ Player* Player::sharedPlayer = nullptr;
 Player::Player()
 {
     playerHP = MAX_PLAYER_HP;
-    enemyHP = MAX_PLAYER_HP;
-    playerGold = 4;
-    playerLevel = 1;
-    playerExp = 0;
+    playerGold = 5;
+    //此处改为了5
     myPlayer = nullptr;
 }
 
@@ -29,22 +27,25 @@ bool Player::init()
     {
         return true;
     }
- 
-    myPlayer = Sprite::create("Player.png");
-    myPlayer->setScale(0.1f);
-    myPlayer->setPosition(Vec2(98 * (1+ 2.5f), 98 * (8 + 1.5f)));
-    this->addChild(myPlayer);
 
+    myPlayer = Sprite::create(PLAYER_WINDOW);
+    myPlayer->setPosition(98 + myPlayer->getContentSize().width / 2, 98*10 - myPlayer->getContentSize().height / 2);
+    this->addChild(myPlayer);
+    labelPlayerGold = Label::createWithTTF(StringUtils::format("%d", playerGold), "fonts/Marker Felt.ttf", 24);
+    labelPlayerGold->setPosition(98 + myPlayer->getContentSize().width / 3+ labelPlayerGold->getContentSize().width / 2,
+        98 * 10 - myPlayer->getContentSize().height / 2 - 98 / 4);
+    addChild(labelPlayerGold);
 	Sprite* bloodSp = Sprite::create("blood.png");
 	bloodBar = ProgressTimer::create(bloodSp);
 	bloodBar->setType(ProgressTimer::Type::BAR);
 	bloodBar->setMidpoint(Point(0, 0.5));
 	bloodBar->setBarChangeRate(Point(1, 0));
 	bloodBar->setPercentage(100.f);
-	bloodBar->setPosition(Vec2(98 * (1 + 2.5f), 98 * (8 + 1.5f) + 40.f));
+    bloodBar->setPosition(98 + myPlayer->getContentSize().width / 2+98/4+bloodBar->getContentSize().width/2, 
+        98 * 10 - myPlayer->getContentSize().height / 2-98/4);
 	addChild(bloodBar);
-
     this->scheduleUpdate();
+
     return true;
 }
 
@@ -75,4 +76,9 @@ Sprite* Player::getPlayer()
     if (nullptr == myPlayer)
         return nullptr;
     return myPlayer;
+}
+
+void Player::playerUpgrade()
+{
+    ;
 }

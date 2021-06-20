@@ -63,7 +63,6 @@ public:
 
 	virtual void resetHero();
 	
-	virtual void starsUP();
 public:
 	unsigned int m_Tag;   //tag
 	int m_Type;  //棋子类型，在子类创建时确定

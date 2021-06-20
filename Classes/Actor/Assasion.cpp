@@ -3,11 +3,11 @@
 Assasion::Assasion()
 {
 	this->m_HP = 2100;
-	this->m_Status.m_Damage.m_PhysicalDamage = 150;
+	this->m_Status.m_Damage.m_PhysicalDamage = 200;
 	this->m_Status.m_Damage.m_PowerDamage = 50;
-	this->m_Status.m_Defense.m_PhysicalDefense = 50;
-	this->m_Status.m_Defense.m_PowerDefense = 30;
-	this->m_Status.m_AttackFrequency = 50;
+	this->m_Status.m_Defense.m_PhysicalDefense = 70;
+	this->m_Status.m_Defense.m_PowerDefense = 50;
+	this->m_Status.m_AttackFrequency = 5;
 	this->m_Cost = 1;
 	this->m_Type = Type_Assasion;
 	boardX = -1;
