@@ -1,5 +1,4 @@
 #include "Scene/PauseScene.h"
-#include "Scene/StartGame.h"
 #include "Const/Const.h"
 USING_NS_CC;
 extern int  BGM_name;

@@ -103,6 +103,25 @@ typedef struct sStatus
 		this->m_AttackFrequency = frequency;
 	}
 
+	sStatus& operator*=(float ft)
+	{
+
+		this->m_Defense.m_PhysicalDefense =
+			static_cast<unsigned int>(m_Defense.m_PhysicalDefense * ft);
+		this->m_Defense.m_PhysicalDefense =
+			static_cast<unsigned int> (m_Defense.m_PhysicalDefense * ft);
+		this->m_Defense.m_PowerDefense =
+			static_cast<unsigned int> (m_Defense.m_PowerDefense * ft);
+		this->m_Damage.m_PhysicalDamage =
+			static_cast<unsigned int> (m_Damage.m_PhysicalDamage * ft);
+		this->m_Damage.m_PowerDamage =
+			static_cast<unsigned int> (m_Damage.m_PowerDamage * ft);
+		this->m_AttackFrequency =
+			static_cast<unsigned int>(m_AttackFrequency * ft);
+
+		return (*this);
+	}
+
 } STATUS;
 
 #endif

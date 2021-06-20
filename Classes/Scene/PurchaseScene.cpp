@@ -1,17 +1,16 @@
-#include "Scene/PurchaseScene.h"
-#include "Scene/StartGame.h"
-#include "Scene/HeroLayer.h"
-#include "Const/Const.h"
-USING_NS_CC;
+#include "PurchaseScene.h"
+
 static void problemLoading(const char* filename)
 {
     printf("Error while loading: %s\n", filename);
     printf("Depending on how you compiled you might have to add 'Resources/' in front of filenames in StartGameScene.cpp\n");
 }
+
 Scene* PurchaseScene::createScene()
 {
     return PurchaseScene::create();
 }
+
 bool PurchaseScene::init()
 {
     if (!Scene::init())
@@ -89,11 +88,12 @@ bool PurchaseScene::init()
         this->addChild(sprite, 0);
     }
     //添加内容
-    HeroPurchase* hh = HeroPurchase::create();//修改过 
-    this->addChild(hh);//changed by zhangyu
+    HeroPurchase* h = HeroPurchase::create();
+    this->addChild(h);
 
     return true;
 }
+
 void PurchaseScene::menuCloseCallback(Ref* pSender)
 {
     Director::getInstance()->end();

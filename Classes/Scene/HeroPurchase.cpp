@@ -95,11 +95,27 @@ bool  HeroPurchase::onTouchBegan(cocos2d::Touch* touch, cocos2d::Event* unused_e
 				touchLocation.y > heroLocation.y - heroSize.height / 2 &&
 				touchLocation.y < heroLocation.y + heroSize.height / 2)
 			{
-				//auto s = Sprite::create(vecDrawHero[n]);
-				onReadyNum++;
-				vecOnReady.push_back(vecDrawHero[n]);
-				this->removeChild(i);
-				i = nullptr;
+				//auto s = Sprite::create(vecDrawHero[n]);			
+				unsigned int cost = 999;
+				if (vecDrawHero[n] == "Tank.png")
+					cost = 1;
+				else if (vecDrawHero[n] == "Assasion.png")
+					cost = 1;
+				else if (vecDrawHero[n] == "ADC.png")
+					cost = 2;
+				else if (vecDrawHero[n] == "AP.png")
+					cost = 2;
+				else if (vecDrawHero[n] == "AOE.png")
+					cost = 3;
+				if (cost <= Player::getInstance()->playerGold)
+				{
+					onReadyNum++;
+					Player::getInstance()->playerGold -= cost;
+					vecOnReady.push_back(vecDrawHero[n]);
+					Player::getInstance()->addHeroClick(vecDrawHero[n]);
+					this->removeChild(i);
+					i = nullptr;
+				}
 			}
 		}
 		n++;

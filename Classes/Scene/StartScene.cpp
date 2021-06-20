@@ -1,12 +1,5 @@
-#include "Scene/StartScene.h"
-#include "Scene/StartGame.h"
-#include "Const/Const.h"
-//#include "ui/CocosGUI.h"
-//using namespace cocos2d::ui;
-USING_NS_CC;
-//#define BGM "music/bgm_1.mp3"
-//#define BGM_pressed "music/pressed.mp3"
-//#define BGM_game "music/bgm_game.mp3"
+#include "StartScene.h"
+
 int  BGM_name;
 bool if_bgm_on = 1;
 bool gIsEffectPlaying = 1;
@@ -25,6 +18,7 @@ bool StartScene::init()
     {
         return false;
     }
+   
     BGM_name = AudioEngine::play2d(BGM, true, .5);
     AudioEngine::preload(BGM_pressed);
     if_bgm_on = true;
@@ -87,7 +81,6 @@ bool StartScene::init()
 }
 void StartScene::CloseCallback(Ref* pSender)
 {
-
     Director::getInstance()->end();
 }
 void StartScene::StartCallback(Ref* pSender)
@@ -97,5 +90,5 @@ void StartScene::StartCallback(Ref* pSender)
     BGM_name = AudioEngine::play2d(BGM_game, true, 0.5f);
     if (!if_bgm_on)
         AudioEngine::pause(BGM_name);
-    Director::getInstance()->replaceScene(TransitionMoveInB::create(1.0f, StartGame::createScene()));
+    Director::getInstance()->replaceScene(TransitionMoveInB::create(1.0f, GameScene::createScene()));
 }
